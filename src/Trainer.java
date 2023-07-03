@@ -15,7 +15,6 @@ public class Trainer {
 	private String trainer_id;
 	private int pokedollars;
 	private bag myBag = new bag();
-	
 	public Trainer(String n, int badges, PartnerPokemon p, String nickname, String ID, int money) {
 		name = n;
 		numBadges = badges;
@@ -23,8 +22,9 @@ public class Trainer {
 		partner.setNickname(nickname);
 		party[0] = partner;
 		trainer_id = ID;
-		setMoney(money);
+		pokedollars = money;
 	}
+	
 	private String format(int n) {
 		NumberFormat numberFormat = NumberFormat.getIntegerInstance();
         return numberFormat.format(n);
@@ -109,10 +109,7 @@ public class Trainer {
 	public int getMoney() {
 		return pokedollars;
 	}
-	public void setMoney(int pokedollars) {
-		this.pokedollars = pokedollars;
-	}
-	public void addMoney(int pokedollars) {
+	public void deposit(int pokedollars) {
 		this.pokedollars += pokedollars;
 	}
 	public void withdraw(int pokedollars) {
@@ -209,6 +206,7 @@ class GymLeader extends Trainer{
 	private String gymLocation;
 	private String badgeName;
 	private static int gymID = 0;
+
 	public GymLeader(String n, PartnerPokemon p, String nickname, String special, String location, int money, String badge) {
 		super(n, 0, p, nickname, Integer.toString(gymID), money);
 		gymID++;
@@ -222,11 +220,22 @@ class GymLeader extends Trainer{
 	public String toString() {
 		return this.getName() + " is a specialist in " + speciality + "-type Pokemon and is the Gym Leader at the " + gymLocation + " Gym. Challengers, after winning, may obtain the " + badgeName + " Badge as a symbol of their victory.";
 	}
+	public String getSpeciality() {
+		return speciality;
+	}
+	public String getGymLocation() {
+		return gymLocation;
+	}
+	public String getBadgeName() {
+		return badgeName;
+	}
+
 }
 
 class Champion extends Trainer{
 	private String region;
 	private boolean gender;
+
 	public Champion(String n, PartnerPokemon p, String nickname, String ID, int money, String re) {
 		super(n, 8, p, nickname, ID, money);
 		region = re;
@@ -250,4 +259,8 @@ class Champion extends Trainer{
 		}
 		return getName() + " is the Pokemon League Champion of " + region +". His partner Pokemon is " + getPartner().getName()+".";
 	}
+	public String getRegion() {
+		return region;
+	}
+	
 }

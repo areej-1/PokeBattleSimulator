@@ -10,7 +10,7 @@ public class Battle {
 		trainer2 = t2;
 	}
 
-	private int swapCurrentPokemon(Scanner scanner, Trainer t, int curr) {
+	private int swapCurrentPokemon(Scanner scanner, Trainer t, int curr) { //swapCurrentPokemon method. takes in scanner, trainer, and current pokemon, and swaps the current pokemon to the one the trainer chooses
 		if (t.party()[curr].healthVal() == 0) {
 	        while (true) {
 	            System.out.println("Which Pokemon would you like to send out next?");
@@ -47,7 +47,7 @@ public class Battle {
         }
 		
 	}
-	private void heal(String input, int currentP, Trainer t) {
+	private void heal(String input, int currentP, Trainer t) { //heal method. takes in input, current pokemon, and trainer, and heals the pokemon depending on the item (input)
 		switch(input) {
 			case "Potion":
 				try {
@@ -98,8 +98,8 @@ public class Battle {
 
 		
 	}
-	private void attack(int p, Trainer curr, int opP, Trainer other, Scanner scanner) {
-		move targetMove;
+	private void attack(int p, Trainer curr, int opP, Trainer other, Scanner scanner) { //attack method. takes in the current pokemon, current trainer, opponent pokemon, opponent trainer, and scanner, and attacks the opponent pokemon
+		Move targetMove;
 		while (true) {
 			System.out.println("What move should " + curr.party()[p].getName() + " use?");
 			System.out.println(curr.party()[p].getMoves());
@@ -117,30 +117,27 @@ public class Battle {
 
 		}
 		System.out.println(curr.party()[p].getName() + " used " + targetMove.getName() + "!");
-		double damage = (Math.random()*251);
-		if (curr.party()[p].getAbility()!=null) {
-			if (curr.party()[p].getAbility() instanceof Rivalry) {
-	            // Apply the modifier
-	            damage = ((Rivalry) curr.party()[p].getAbility()).applyEffect(curr.party()[p], damage, other.party()[opP]);
-	        } else if (curr.party()[p].getAbility() instanceof Torrent) {
-				damage = ((Torrent) curr.party()[p].getAbility()).applyEffect(curr.party()[p], targetMove, damage);
-			} else if (curr.party()[p].getAbility() instanceof Blaze) {
-				damage = ((Blaze) curr.party()[p].getAbility()).applyEffect(curr.party()[p], targetMove, damage);
-			}
+		double damage = Move.damageToInflict(curr.party()[p], other.party()[opP], targetMove);
+		//check if the current pokemons ability is null, otherwise call the ability's applyEffect method
+		if (curr.party()[p].getAbility() != null) {
+			/*
+			 * wip...
+			 * should check the ability name, then cast it to the correct ability type (or class, rather), then call the applyEffect method.
+			 */
 		}
-		other.party()[opP].doDamage(damage, targetMove);
+
+		other.party()[opP].doDamage(damage, targetMove); 
 	}
-	public String battle(Scanner scanner) {
+	public String battle(Scanner scanner) { 
 	    System.out.println("This is a battle between " + trainer1.getName() + " and " + trainer2.getName() + ". Battle begin!");
 	    System.out.println(trainer1.getName() + " sent out " + trainer1.party()[0].getName());
 	    System.out.println(trainer2.getName() + " sent out " + trainer2.party()[0].getName());
 
 	    int currentP1 = 0, currentP2 = 0;
 	    String input;
-	    boolean initiative = trainer1.party()[currentP1].getSpeed() > trainer2.party()[currentP2].getSpeed();
-	    // Initialize trainer1Turn outside the loop
+		
+	    boolean initiative = trainer1.party()[currentP1].getSpeed() > trainer2.party()[currentP2].getSpeed(); //
 	    boolean trainer1Turn = trainer1.party()[currentP1].getSpeed() == trainer2.party()[currentP2].getSpeed() ? initiative : trainer1.party()[currentP1].getSpeed() > trainer2.party()[currentP2].getSpeed();
-
 	    while (!trainer1.partyFainted() && !trainer2.partyFainted()) {
 	        Trainer currentTrainer = trainer1Turn ? trainer1 : trainer2;
 	        Trainer otherTrainer = trainer1Turn ? trainer2 : trainer1;
@@ -149,12 +146,12 @@ public class Battle {
 	        System.out.println("What would you like to do, " + currentTrainer.getName() + "?");
 	        System.out.println(Arrays.toString(options));
 	        input = scanner.nextLine();
-	        if (input.equals("attack")) {
+	        if (input.equals("attack")) { 
 	            attack(currentP, currentTrainer, otherP, otherTrainer, scanner);
 	            if (otherTrainer.partyFainted()) {
 	            	System.out.println(otherTrainer.party()[otherP].getName() + " has fainted");
 	                break;
-	            } else if (otherTrainer.party()[otherP].healthVal() == 0) {
+	            } else if (otherTrainer.party()[otherP].healthVal() == 0) { //if the opponent pokemon has fainted, ask the opponenet which pokemon they want to swap with
 	            	System.out.println(otherTrainer.party()[otherP].getName() + " has fainted");
 	                if (trainer1Turn) {
 	                    currentP2 = swapCurrentPokemon(scanner, otherTrainer, otherP);

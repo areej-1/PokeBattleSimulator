@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 public class Pokemon {
-	public enum PokemonType {
+	public enum PokemonType { // 18 types (represented by enum constants)
 	    NORMAL,
 	    FIRE,
 	    WATER,
@@ -37,7 +37,7 @@ public class Pokemon {
 	private String evolution;
 	private String evolveFrom;
 	private final int maxChar = 119;
-	private move[] moves = new move[4];
+	private Move[] moves = new Move[4];
 	private int health;
 	private static HashMap<PokemonType, List<PokemonType>> typeWeaknesses = new HashMap<>();
 	private static HashMap<PokemonType, List<PokemonType>> typeResistances = new HashMap<>();
@@ -46,11 +46,11 @@ public class Pokemon {
 	private Ability ability;
 	private boolean gender; //true -> female, false -> male
 	
-	Set<PokemonType> weakness = new HashSet<PokemonType>();
+	Set<PokemonType> weakness = new HashSet<PokemonType>(); //specific to each Pokemon, taken from the static HashMaps below
 	Set<PokemonType> resistance = new HashSet<PokemonType>();
 	Set<PokemonType> noEffect = new HashSet<PokemonType>();
 	
-	static {
+	static { //static initializer for typeWeaknesses, typeResistances, and typeNoEffects (all HashMaps)
 		addToMap(typeWeaknesses, PokemonType.NORMAL, PokemonType.FIGHTING);
 	    addToMap(typeWeaknesses, PokemonType.FIRE, PokemonType.WATER, PokemonType.GROUND, PokemonType.ROCK);
 	    addToMap(typeWeaknesses, PokemonType.WATER, PokemonType.ELECTRIC, PokemonType.GRASS);
@@ -109,8 +109,8 @@ public class Pokemon {
 	    addToMap(typeNoEffects, PokemonType.FAIRY, PokemonType.DRAGON);
 	}
 	
-	public Pokemon(String n, String t, int lvl, String d, int he, int speed, Ability myAbility, boolean mof, Scanner scanner) {
-        name = n;
+	public Pokemon(String n, String t, int lvl, String d, int he, int attack, int defense, int spAtk, int spDef, int speed, Ability myAbility, boolean mof, Scanner scanner) { 
+		name = n;
         
         type = new ArrayList<>();
         String[] types = t.split("/");
@@ -129,6 +129,10 @@ public class Pokemon {
         //evolveFrom(scanner);
         health = he;
         stats[0] = he;
+		stats[1] = attack;
+		stats[2] = defense;
+		stats[3] = spAtk;
+		stats[4] = spDef;
         stats[5] = speed;
         for (int i = 0; i < getType().size(); i++) {
 			weakness.addAll(typeWeaknesses.get(this.getType().get(i)));
@@ -139,14 +143,14 @@ public class Pokemon {
         gender = mof;
     }
 
-	private static void addToMap(HashMap<PokemonType, List<PokemonType>> map, PokemonType key, PokemonType... values) {
+	private static void addToMap(HashMap<PokemonType, List<PokemonType>> map, PokemonType key, PokemonType... values) { //adds a key and values to a map (used for type weaknesses, resistances, and no effects)
 	    map.put(key, new ArrayList<>(Arrays.asList(values)));
 	}
 	
-	public void setMoves(Scanner scanner) {
+	public void setMoves(Scanner scanner) { //sets the moves of the pokemon
 	    String move;
 	    PokemonType type;
-	    move m;
+	    Move m;
 	    for (int i = 0; i <= 3; i++) {
 	        System.out.println("Please enter in move number " + (i + 1) + " of " + getName());
 	        move = scanner.nextLine();
@@ -160,15 +164,15 @@ public class Pokemon {
 	            }
 
 	        }
-	        m = new move(type, move);
+	        m = new Move(move, type);
 	        moves[i] = m;
 	    }
 	}
-	public void changeMove(Scanner scanner, move newMove) {
+	public void changeMove(Scanner scanner, Move newMove) { //changes a move to a new move
 		System.out.println("Which move would you like to replace? Choose from the following:");
 		System.out.println(Arrays.toString(moves));
 		String n = scanner.nextLine();
-		move cMove = new move(null, n);
+		Move cMove = new Move(n, null);
 		boolean contains = Arrays.stream(moves).anyMatch(cMove::equals);
 		if (!contains) {
 			System.out.println("This Pokemon doesn't know that move.");
@@ -179,10 +183,10 @@ public class Pokemon {
 		}
 		
 	}
-	public void levelUp() {
+	public void levelUp() { //levels up the Pokemon by 1
 		level++;
 	}
-	public String format(String input) {
+	public String format(String input) { //formats the input string so that it is easier to read in the console (used in the toString method for descriptions/pokedex entries)
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < input.length(); i++) {
             sb.append(input.charAt(i));
@@ -193,7 +197,7 @@ public class Pokemon {
 
         return sb.toString();
 	}
-	public String getMoves() {
+	public String getMoves() { //returns the moveset of the Pokemon, but in a String format (for the toString method). formatting looks like this: 'move1, move2, move3, move4'
 		String s = "";
 		for (int i = 0; i < 3; i++) {
 			s += moves[i].getName() + ", ";
@@ -201,10 +205,11 @@ public class Pokemon {
 		s+= moves[3].getName();
 		return s;
 	}
-	public move[] moveset() {
+	public Move[] moveset() { //returns the moveset of the Pokemon
 		return moves;
 	}
-	/*public String toString() {
+
+	/*public String toString() { //TODO: Make this better
 		if (evolution.equals("Doesn't evolve into any Pokemon") && evolveFrom.equals("Doesn't evolve from any Pokemon")) {
 			return name + " - A " + type + " Type\nThe " + desc + " Pokemon\n" + evolveFrom + ", " + evolution + "\n\n" + extendedDesc+"\n\n"; 
 		}
@@ -216,55 +221,52 @@ public class Pokemon {
 		}
 		return name + " - A " + type + " Type\nThe " + desc + " Pokemon\n" + "Evolves from: " + evolveFrom + ", evolves into: " + evolution + "\n\n" + extendedDesc+"\n\n";
 	}*/
-	public String getName() {
+	public String getName() { //returns the name of the Pokemon
 		return name;
 	}
-	public int getLevel() {
+	public int getLevel() { //returns the level of the Pokemon
 		return level;
 	}
-	public move[] moves() {
+	public Move[] moves() { //returns the moves of the Pokemon
 		return moves;
 	}
-	public List<PokemonType> getType() {
+	public List<PokemonType> getType() { //returns the type(s) of the Pokemon
 		return type;
 	}
-	public String getClassification() {
+	public String getClassification() { //returns the classification of the Pokemon
 		return desc;
 	}
-	public String previousEvolution() {
+	public String previousEvolution() { //returns the previous evolution of the Pokemon
 		return evolveFrom;
 	}
-	public String nextEvolution() {
+	public String nextEvolution() { //returns the next evolution of the Pokemon
 		return evolution;
 	}
-	public String getDescription() {
+	public String getDescription() { //returns the extended description of the Pokemon
 		return extendedDesc;
 	}
-	public int healthVal() {
+	public int healthVal() { //returns the current health of the Pokemon
 		return health;
 	}
-	public void doDamage(double damage, move m) {
-	    boolean isWeak = false;
-	    boolean isResistant = false;
-
-	    for (PokemonType type : this.type) {
-	        if (typeWeaknesses.get(type).contains(m.getType())) {
-	            isWeak = true;
-	        } else if (typeResistances.get(type).contains(m.getType())) {
-	            isResistant = true;
-	        }
-	    }
-
-	    if (isWeak && !isResistant) {
-	        damage *= 2;
-	        System.out.println("Super effective!");
-	    } else if (!isWeak && isResistant) {
-	        damage /= 2;
-	        System.out.println("Not very effective.");
-	    } else if (noEffect.contains(m.getType())) {
-	        damage = 0;
-	        System.out.println("It had no effect...");
-	    }
+	public void doDamage(double damage, Move m) {  //deals damage to the current Pokemon
+		int multiplier = findMultiplier(m);
+	    damage = damage*multiplier;
+		//if multiplier is 2, print 'Super effective!'
+		//if multiplier is 0.5, print 'Not very effective.'
+		//if multiplier is 0, print 'It had no effect...'
+		//if multiplier is 1, print 'It was effective.'
+		if (multiplier == 2) {
+			System.out.println("Super effective!");
+		}
+		else if (multiplier == 0.5) {
+			System.out.println("Not very effective.");
+		}
+		else if (multiplier == 0) {
+			System.out.println("It had no effect...");
+		}
+		else if (multiplier == 1) {
+			System.out.println("It was effective.");
+		}
 
 	    if (health - damage < 0) {
 	        health = 0;
@@ -272,9 +274,7 @@ public class Pokemon {
 	        health -= damage;
 	    }
 	}
-
-
-	public void heal(int healAmount) {
+	public void heal(int healAmount) { //heals the Pokemon by healAmount, but cannot exceed the max HP
 		if (health+healAmount > stats[0]) {
 			health = stats[0];
 		}
@@ -282,45 +282,109 @@ public class Pokemon {
 			health+=healAmount;
 		}
 	}
-	public int maxHP() {
+	public int maxHP() { //the max HP of the Pokemon
 		return stats[0];
 	}
-	public Set<Pokemon.PokemonType> getWEAKNESS() {
+	public Set<Pokemon.PokemonType> getWEAKNESS() { //returns the weaknesses of the Pokemon
 		return weakness;
 	}
-	public Set<Pokemon.PokemonType> getRESISTANCE() {
+	public Set<Pokemon.PokemonType> getRESISTANCE() { //returns the resistances of the Pokemon
 		return resistance;
 	}
-	public Set<Pokemon.PokemonType> getNOEFFECT() {
+	public Set<Pokemon.PokemonType> getNOEFFECT() { //returns the types that have no effect on the Pokemon (can be empty)
 		return noEffect;
 	}
-	public int getSpeed() {
+	public int getAttack() { //returns the attack stat of the Pokemon
+		return stats[1];
+	}
+	public int getDefense() { //returns the defense stat of the Pokemon
+		return stats[2];
+	}
+	public int getSpAtk() { //returns the special attack stat of the Pokemon
+		return stats[3];
+	}
+	public int getSpDef() { //returns the special defense stat of the Pokemon
+		return stats[4];
+	}
+	public int getSpeed() { //returns the speed stat of the Pokemon
 		return stats[5];
 	}
-
-	public Ability getAbility() {
+	public Ability getAbility() { //returns the ability of the Pokemon
+		if (ability == null) {
+			return null;
+		}
 		return ability;
 	}
 
-	public boolean getGender() {
+	public boolean getGender() { //returns the gender of the pokemon: true -> female, false -> male
 		return gender;
+	}
+	//finds the multiplier needed when a move of a specific type is used. can be 0.25, 0.5, 1, 2, or 4. will be 0 if the move has no effect. by default, multiplier is 1.
+	public int findMultiplier(Move m){
+		int multiplier = 1;
+		for (int i = 0; i < m.getType().size(); i++) {
+			if (weakness.contains(m.getType().get(i))) {
+				multiplier*=2;
+			}
+			else if (resistance.contains(m.getType().get(i))) {
+				multiplier/=2;
+			}
+			else if (noEffect.contains(m.getType().get(i))) {
+				multiplier = 0;
+			}
+		}
+		return multiplier;
+	}
+	public void setAttack(int a) { //sets the attack stat of the Pokemon
+		stats[1] = a;
+	}
+	public void setDefense(int d) { //sets the defense stat of the Pokemon
+		stats[2] = d;
+	}
+	public void setSpAtk(int sa) { //sets the special attack stat of the Pokemon
+		stats[3] = sa;
+	}
+	public void setSpDef(int sd) { //sets the special defense stat of the Pokemon
+		stats[4] = sd;
+	}
+	public void setSpeed(int s) { //sets the speed stat of the Pokemon
+		stats[5] = s;
+	}
+	public double getSTAB(Move move) { //returns the STAB value of the Pokemon, depending on the type of move/ability the Pokemon has
+		boolean isSameType = false;
+		for (int i = 0; i < move.getType().size(); i++) {
+			for (int j = 0; j < type.size(); j++) {
+				if (move.getType().get(i).equals(type.get(j))) {
+					isSameType = true;
+				}
+			}
+		}
+		if (ability!= null && ability.getName().equals("Adaptability") && isSameType) { //if the Pokemon has the ability Adaptability, the STAB value is 2
+			return 2;
+		}
+		else if (isSameType) { //if the Pokemon has the same type as the move, the STAB value is 1.5 (if the pokemon doesn't have Adaptability)
+			return 1.5;
+		}
+		else {
+			return 1; //if the Pokemon doesn't have the same type as the move, the STAB value is 1 (default)
+		}
 	}
 
 }
 
-class PartnerPokemon extends Pokemon{
+class PartnerPokemon extends Pokemon{ //this class is for the Pokemon that the player has as a partner
 	private String nickname;
-	public PartnerPokemon(String n, String t, int lvl, String d, int health, int speed, Ability ability, boolean mof, Scanner scanner) {
-		super(n, t, lvl, d, health, speed, ability,mof, scanner);
+	public PartnerPokemon(String n, String t, int lvl, String d, int health, int attack, int defense, int spAtk, int spDef, int speed, Ability ability, boolean mof, Scanner scanner) {
+		super(n, t, lvl, d, health, attack, defense, spAtk, spDef, speed, ability, mof, scanner);
 	}
-	public void setNickname(String nn) {
+	public void setNickname(String nn) { //sets the nickname of the Pokemon
 		nickname = nn;
 	}
-	public String getNickname() {
+	public String getNickname() { //returns the nickname of the Pokemon
 		return nickname;
 	}
 	@Override
-	public String toString() {
+	public String toString() { //modified toString from Pokemon class
 		if (nextEvolution().equals("Doesn't evolve into any Pokemon") && previousEvolution().equals("Doesn't evolve from any Pokemon")) {
 			return nickname + "(" + getName() + ") - A " + getType() + " Type\nThe " + getClassification() + " Pokemon\n" + previousEvolution() + ", " + nextEvolution() + "\n\n" + getDescription()+"\n\n"; 
 		}
@@ -333,3 +397,5 @@ class PartnerPokemon extends Pokemon{
 		return nickname + "(" + getName() + ") - A " + getType() + " Type\nThe " + getClassification() + " Pokemon\n" + "Evolves from: " + previousEvolution() + ", evolves into: " + nextEvolution() + "\n\n" + getDescription()+"\n\n";
 	}
 }
+
+

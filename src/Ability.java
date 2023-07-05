@@ -1,86 +1,54 @@
-public class Ability {
-	private String name;
-	public Ability(String n) {
-		name = n;
-	}
-	public String getName() {
-		return name;
-	}
+public interface Ability {
+    void applyEffect(String event, BattleContext context);
 }
-class Torrent extends Ability{
-	public Torrent() {
-		super("Torrent");
-	}
-	public double applyEffect(Pokemon user, Move move, double baseDamage) {
-		if (move.getType().contains(Pokemon.PokemonType.WATER) && user.healthVal() <= user.maxHP() * 0.33) {
-			System.out.println("torrent used");
-            return baseDamage * 1.5;
-        }
-        return baseDamage;
-	}
-}
-class Blaze extends Ability{
-	public Blaze() {
-		super("Blaze");
-	}
-	public double applyEffect(Pokemon user, Move move, double baseDamage) {
-		if (move.getType().contains(Pokemon.PokemonType.FIRE) && user.healthVal() <= user.maxHP() * 0.33) {
-			System.out.println("blaze used");
-            return baseDamage * 1.5;
-        }
-        return baseDamage;
-	}
-}
-
-//class for the ability rivalry, which is described as The Pokémon's competitive spirit makes it deal more damage to Pokémon of the same gender, but less damage to Pokémon of the opposite gender.	
-//the class, other than its constructor, has a function, called applyEffect, which takes the user Pokemon, target Pokemon, and the base damage of the move as parameters. It returns the base damage of the move, after applying the effect of the ability.
-class Rivalry extends Ability{
-	public Rivalry() {
-		super("Rivalry");
-	}
-	public double applyEffect(Pokemon user, double baseDamage, Pokemon target) {
-		if (user.getGender() == target.getGender()) {
-			System.out.println("rivalry used");
-			return baseDamage * 1.25;
-		} else if (user.getGender() != target.getGender()) {
-			return baseDamage * 0.75;
+class Blaze implements Ability {  //Blaze: "Powers up Fire-type moves when the Pokémon's HP is low."
+    @Override
+    public void applyEffect(String event, BattleContext context) { //check if the event is "damage calculation" and if the types of the move contain FIRE and check if the user's HP is less than or equal to 33% of its max HP. if so, multiply the damage by 1.5
+		if ("damage calculation".equals(event) && context.getMove().getType().contains(Pokemon.PokemonType.FIRE) && context.getUser().healthVal() <= context.getUser().getMaxHP() / 3) {
+			context.setDamage(context.getDamage() * 1.5);
 		}
-		return baseDamage;
-	}
+    }
 }
-//class for the ability Huge Power, which is described as "Doubles the Pokémon's (user's) Attack stat."
-//to apply the effect of the ability, a function called applyEffect is used, which takes the user Pokemon (of the ability), and doubles its attack stat. it is a void method.
-class HugePower extends Ability{
-	public HugePower() {
-		super("Huge Power");
-	}
-	public void applyEffect(Pokemon user) {
-		System.out.println("huge power used");
-		user.setAttack(user.getAttack() * 2);
-	}
-}
-
-//class for the ability Thick Fat, which is described as "The Pokémon is protected by a layer of thick fat, which halves the damage taken from Fire- and Ice-type moves."
-//to apply the effect of the ability, a function called applyEffect is used, which takes the user Pokemon (of the ability), and halves the damage taken from fire and ice type moves. i
-class ThickFat extends Ability{
-	public ThickFat() {
-		super("Thick Fat");
-	}
-	public double applyEffect(Pokemon user, double baseDamage, Move move) {
-		System.out.println("thick fat used");
-		if (move.getType().contains(Pokemon.PokemonType.FIRE) || move.getType().contains(Pokemon.PokemonType.ICE)) {
-			baseDamage = baseDamage / 2;
+/*class HugePower implements Ability { //Huge Power: "Doubles the Pokémon's Attack stat."
+    @Override
+    public void applyEffect(String event, BattleContext context) { //check if the event is "stats modification". if so, multiply the user's attack by 2
+        if ("stats modification".equals(event)) {
+            context.getUser().setAttack(context.getUser().getAttack() * 2);
+        }
+    }
+}*/ //implemented when i add the necessary code (for changing the stats only once (when the pokemon is  sent out), then setting back to normal afterwards(after fainting, call back, etc))
+// Intimidate: "Lowers the foe's Attack stat."
+/*class Intimidate implements Ability {
+	@Override
+	public void applyEffect(String event, BattleContext context) { //check if the event is "stats modification". if so, divide the target's attack by 2
+		if ("stats modification".equals(event)) {
+			context.getTarget().setAttack(context.getTarget().getAttack() / 2);
 		}
-		return baseDamage;
-
+	}
+}*/ //same thing as for HugePower: implemented when i add the necessary code (for changing the stats only once (when the pokemon is  sent out), then setting back to normal afterwards(after fainting, call back, etc))
+class Torrent implements Ability{ //Torrent: "Powers up Water-type moves when the Pokémon's HP is low."
+	@Override
+	public void applyEffect(String event, BattleContext context) { //check if the event is "damage calculation" and if the types of the move contain WATER and check if the user's HP is less than or equal to 33% of its max HP. if so, multiply the damage by 1.5
+		if ("damage calculation".equals(event) && context.getMove().getType().contains(Pokemon.PokemonType.WATER) && context.getUser().healthVal() <= context.getUser().getMaxHP() / 3) {
+			context.setDamage(context.getDamage() * 1.5);
+		}
 	}
 }
-
-//class for the ability Adaptability, which is described as "Powers up moves of the same type as the Pokémon."
-//the effects of adaptability are applied in the Pokemon class, when the method getSTAB is called. the method getSTAB checks whether or not a Pokemon has the ability adaptability, and if it does, it sets the STAB of the Pokemon to 2 (as long as the move is of the same type as the Pokemon).
-class Adaptability extends Ability{
-	public Adaptability() {
-		super("Adaptability");
+// Thick Fat: "Ups resistance to Fire- and Ice-type moves."
+class ThickFat implements Ability{
+	@Override
+	public void applyEffect(String event, BattleContext context) { //check if the event is "damage calculation" and if the types of the move contain FIRE or ICE. if so, divide the damage by 2
+		if ("damage calculation".equals(event) && (context.getMove().getType().contains(Pokemon.PokemonType.FIRE) || context.getMove().getType().contains(Pokemon.PokemonType.ICE))) {
+			context.setDamage(context.getDamage() / 2);
+		}
 	}
-
+}
+// Adaptability: "Powers up moves of the same type."
+class Adaptability implements Ability{
+	@Override
+	public void applyEffect(String event, BattleContext context) { //check if the event is "damage calculation" and if the types of the move contain the same type as the user. if so, multiply the damage by 2
+		if ("damage calculation".equals(event) && context.getMove().getType().contains(context.getUser().getType())) {
+			context.setDamage(context.getDamage() * 2);
+		}
+	}
 }

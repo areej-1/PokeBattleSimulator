@@ -282,7 +282,7 @@ public class Pokemon {
 			health+=healAmount;
 		}
 	}
-	public int maxHP() { //the max HP of the Pokemon
+	public int getMaxHP() { //the max HP of the Pokemon
 		return stats[0];
 	}
 	public Set<Pokemon.PokemonType> getWEAKNESS() { //returns the weaknesses of the Pokemon
@@ -350,23 +350,17 @@ public class Pokemon {
 	public void setSpeed(int s) { //sets the speed stat of the Pokemon
 		stats[5] = s;
 	}
-	public double getSTAB(Move move) { //returns the STAB value of the Pokemon, depending on the type of move/ability the Pokemon has
-		boolean isSameType = false;
-		for (int i = 0; i < move.getType().size(); i++) {
-			for (int j = 0; j < type.size(); j++) {
-				if (move.getType().get(i).equals(type.get(j))) {
-					isSameType = true;
-				}
-			}
+	//returns the STAB value of the Pokemon, depending on the type of move/ability the Pokemon has
+	public double getSTAB(Move m) {
+		if (m.getType().contains(type.get(0))) {
+			return 1.5;
 		}
-		if (ability!= null && ability.getName().equals("Adaptability") && isSameType) { //if the Pokemon has the ability Adaptability, the STAB value is 2
-			return 2;
-		}
-		else if (isSameType) { //if the Pokemon has the same type as the move, the STAB value is 1.5 (if the pokemon doesn't have Adaptability)
+		//if the Pokemon has two types, it will return 1.5 if the move is of either type, but before checking the second type, it will check whether or not the move has 2 types
+		else if (type.size() == 2 && m.getType().contains(type.get(1))) {
 			return 1.5;
 		}
 		else {
-			return 1; //if the Pokemon doesn't have the same type as the move, the STAB value is 1 (default)
+			return 1.0;
 		}
 	}
 

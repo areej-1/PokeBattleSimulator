@@ -4,10 +4,15 @@ import java.util.Scanner;
 public class Battle {
 	private Trainer trainer1;
 	private Trainer trainer2;
+	BattleContext bc_trainer1;
+	BattleContext bc_trainer2;
 	private final String[] options = {"heal", "attack", "swap"};
 	public Battle(Trainer t1, Trainer t2) {
 		trainer1 = t1;
 		trainer2 = t2;
+		bc_trainer1 = new BattleContext(trainer1.party()[0], trainer2.party()[0]);
+		bc_trainer2 = new BattleContext(trainer2.party()[0], trainer1.party()[0]);
+
 	}
 
 	private int swapCurrentPokemon(Scanner scanner, Trainer t, int curr) { //swapCurrentPokemon method. takes in scanner, trainer, and current pokemon, and swaps the current pokemon to the one the trainer chooses
@@ -75,7 +80,7 @@ public class Battle {
 				break;
 			case "Max Potion":
 				try {
-					t.party()[currentP].heal(t.party()[currentP].maxHP());
+					t.party()[currentP].heal(t.party()[currentP].getMaxHP());
 					t.bagg().removeItem("Max Potion", 1);
 				} catch(IllegalArgumentException i) {
 					System.out.println("You don't have that item!");
@@ -83,7 +88,7 @@ public class Battle {
 				break;
 			case "Revive":
 				try {
-					t.party()[currentP].heal(t.party()[currentP].maxHP());
+					t.party()[currentP].heal(t.party()[currentP].getMaxHP());
 					t.bagg().removeItem("Revive", 1);
 				} catch(IllegalArgumentException i) {
 					System.out.println("You don't have that item!");
@@ -100,6 +105,8 @@ public class Battle {
 	}
 	private void attack(int p, Trainer curr, int opP, Trainer other, Scanner scanner) { //attack method. takes in the current pokemon, current trainer, opponent pokemon, opponent trainer, and scanner, and attacks the opponent pokemon
 		Move targetMove;
+		//if curr == trainer1, then bc = bc_trainer1, else bc = bc_trainer2
+		BattleContext bc = (curr == trainer1) ? bc_trainer1 : bc_trainer2;
 		while (true) {
 			System.out.println("What move should " + curr.party()[p].getName() + " use?");
 			System.out.println(curr.party()[p].getMoves());
@@ -118,21 +125,18 @@ public class Battle {
 		}
 		System.out.println(curr.party()[p].getName() + " used " + targetMove.getName() + "!");
 		double damage = Move.damageToInflict(curr.party()[p], other.party()[opP], targetMove);
-		//check if the current pokemons ability is null, otherwise call the ability's applyEffect method
+		bc.setDamage(damage); //set the damage in the battle context to the damage calculated
+		bc.setMove(targetMove); //set the move in the battle context to the move used
+		//check if the current pokemon has a ability (not null), then use the applyEffect method with the parameters "damage calculation" and the battle context (bc)
 		if (curr.party()[p].getAbility() != null) {
-			/*
-			 * wip...
-			 * should check the ability name, then cast it to the correct ability type (or class, rather), then call the applyEffect method.
-			 */
+			curr.party()[p].getAbility().applyEffect("damage calculation", bc);
 		}
-
-		other.party()[opP].doDamage(damage, targetMove); 
+		other.party()[opP].doDamage(bc.getDamage(), targetMove); 
 	}
 	public String battle(Scanner scanner) { 
 	    System.out.println("This is a battle between " + trainer1.getName() + " and " + trainer2.getName() + ". Battle begin!");
 	    System.out.println(trainer1.getName() + " sent out " + trainer1.party()[0].getName());
 	    System.out.println(trainer2.getName() + " sent out " + trainer2.party()[0].getName());
-
 	    int currentP1 = 0, currentP2 = 0;
 	    String input;
 		
@@ -143,6 +147,17 @@ public class Battle {
 	        Trainer otherTrainer = trainer1Turn ? trainer2 : trainer1;
 	        int currentP = trainer1Turn ? currentP1 : currentP2;
 	        int otherP = trainer1Turn ? currentP2 : currentP1;
+			//if current trainer is trainer1, get the ability of trainer1s current pokemon, and use applyEffect method with parameters "stats modification" and bc_trainer1. if its trainer2, get ability of trainer2s current pokemon, then use applyEffect with parameters "stats modification" and bc_trainer2
+			/*
+			if (currentTrainer == trainer1) {
+	        	if (currentTrainer.party()[currentP].getAbility() != null) {
+	        		currentTrainer.party()[currentP].getAbility().applyEffect("stats modification", bc_trainer1);
+	        	}
+	        } else {
+	        	if (currentTrainer.party()[currentP].getAbility() != null) {
+	        		currentTrainer.party()[currentP].getAbility().applyEffect("stats modification", bc_trainer2);
+	        	}
+	        }*/ //(commented out until i figure out how to only make it work once, when the pokemon is sent out. not every turn)
 	        System.out.println("What would you like to do, " + currentTrainer.getName() + "?");
 	        System.out.println(Arrays.toString(options));
 	        input = scanner.nextLine();
@@ -154,10 +169,14 @@ public class Battle {
 	            } else if (otherTrainer.party()[otherP].healthVal() == 0) { //if the opponent pokemon has fainted, ask the opponenet which pokemon they want to swap with
 	            	System.out.println(otherTrainer.party()[otherP].getName() + " has fainted");
 	                if (trainer1Turn) {
-	                    currentP2 = swapCurrentPokemon(scanner, otherTrainer, otherP);
-	                } else {
-	                    currentP1 = swapCurrentPokemon(scanner, otherTrainer, otherP);
-	                }
+	                currentP1 = swapCurrentPokemon(scanner, currentTrainer, currentP);
+					bc_trainer1.setUser(currentTrainer.party()[currentP1]);
+					bc_trainer2.setTarget(currentTrainer.party()[currentP1]);
+	            	} else {
+	                currentP2 = swapCurrentPokemon(scanner, currentTrainer, currentP);
+					bc_trainer1.setTarget(currentTrainer.party()[currentP2]);
+					bc_trainer2.setUser(currentTrainer.party()[currentP2]);
+	            	}
 	            } else {
 	            	System.out.println(otherTrainer.party()[otherP].getName() + " has " + otherTrainer.party()[otherP].healthVal() + " HP remaining");
 	            }
@@ -197,8 +216,12 @@ public class Battle {
 	        } else if (input.equals("swap")) {
 	            if (trainer1Turn) {
 	                currentP1 = swapCurrentPokemon(scanner, currentTrainer, currentP);
+					bc_trainer1.setUser(currentTrainer.party()[currentP1]); //set the user of the battle context for trainer1 to the new pokemon
+					bc_trainer2.setTarget(currentTrainer.party()[currentP1]); //set the target of the battle context for trainer2 to the new pokemon
 	            } else {
 	                currentP2 = swapCurrentPokemon(scanner, currentTrainer, currentP);
+					bc_trainer1.setTarget(currentTrainer.party()[currentP2]); //set the target of the battle context for trainer1 to the new pokemon
+					bc_trainer2.setUser(currentTrainer.party()[currentP2]); //set the user of the battle context for trainer2 to the new pokemon
 	            }
 	        }
 	        
@@ -209,9 +232,9 @@ public class Battle {
 	            initiative = !initiative; // Flip the initiative when levels are the same
 	        }
 
-	    }
-
-	    if (trainer1.partyFainted()) {
+	    } 
+		// Return the winner of the battle
+	    if (trainer1.partyFainted()) { 
 	        return trainer2.getName() + " is the victor!";
 	    } else if (trainer2.partyFainted()) {
 	        return trainer1.getName() + " is the victor!";

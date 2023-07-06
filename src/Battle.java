@@ -166,21 +166,24 @@ public class Battle {
 	            if (otherTrainer.partyFainted()) {
 	            	System.out.println(otherTrainer.party()[otherP].getName() + " has fainted");
 	                break;
-	            } else if (otherTrainer.party()[otherP].healthVal() == 0) { //if the opponent pokemon has fainted, ask the opponenet which pokemon they want to swap with
+	            } else if (otherTrainer.party()[otherP].healthVal() == 0) { //if the opponent pokemon has fainted, ask the opponent which pokemon they want to swap with
 	            	System.out.println(otherTrainer.party()[otherP].getName() + " has fainted");
-	                if (trainer1Turn) {
-	                currentP1 = swapCurrentPokemon(scanner, currentTrainer, currentP);
-					bc_trainer1.setUser(currentTrainer.party()[currentP1]);
-					bc_trainer2.setTarget(currentTrainer.party()[currentP1]);
-	            	} else {
-	                currentP2 = swapCurrentPokemon(scanner, currentTrainer, currentP);
-					bc_trainer1.setTarget(currentTrainer.party()[currentP2]);
-					bc_trainer2.setUser(currentTrainer.party()[currentP2]);
-	            	}
-	            } else {
-	            	System.out.println(otherTrainer.party()[otherP].getName() + " has " + otherTrainer.party()[otherP].healthVal() + " HP remaining");
+					//check which trainer's turn it is, then set the user pokemon (for the opposing/other trainer's battle context) and target pokemon (for the current trainer's battle context) in the battle context accordingly, and swap the current pokemon for the trainer whose turn it is
+					
+					if (trainer1Turn) { //if its trainer1's turn
+						currentP2 = swapCurrentPokemon(scanner, otherTrainer, otherP); //swap the current pokemon for trainer2
+						bc_trainer1.setTarget(otherTrainer.party()[currentP2]); //set the target pokemon for trainer1's battle context to the pokemon that trainer2 swapped in
+						bc_trainer2.setUser(otherTrainer.party()[currentP2]); //set the user pokemon for trainer2's battle context to the pokemon that trainer2 swapped in
+					} else { //if its trainer2's turn
+						currentP1 = swapCurrentPokemon(scanner, otherTrainer, otherP); //swap the current pokemon for trainer1
+						bc_trainer2.setTarget(otherTrainer.party()[currentP1]); //set the target pokemon for trainer2's battle context to the pokemon that trainer1 swapped in
+						bc_trainer1.setUser(otherTrainer.party()[currentP1]); //set the user pokemon for trainer1's battle context to the pokemon that trainer1 swapped in
+					}	
 	            }
-	        } else if (input.equals("heal")) {
+				else { //if the pokemon has not fainted, print out the pokemon's health
+	            	System.out.println(otherTrainer.party()[otherP].getName() + " has " + otherTrainer.party()[otherP].healthVal() + " HP remaining");
+				}	
+	        } else if (input.equals("heal")) { //if the user inputs heal, ask them which item they want to use
 	            System.out.println("Which item would you like to use?\n" + currentTrainer.items());		
 	            input = scanner.nextLine();
 	            if (input.equals("Revive")) {

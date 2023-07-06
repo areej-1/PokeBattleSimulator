@@ -249,7 +249,7 @@ public class Pokemon {
 		return health;
 	}
 	public void doDamage(double damage, Move m) {  //deals damage to the current Pokemon
-		int multiplier = findMultiplier(m);
+		double multiplier = findMultiplier(m);
 	    damage = damage*multiplier;
 		//if multiplier is 2, print 'Super effective!'
 		//if multiplier is 0.5, print 'Not very effective.'
@@ -285,13 +285,13 @@ public class Pokemon {
 	public int getMaxHP() { //the max HP of the Pokemon
 		return stats[0];
 	}
-	public Set<Pokemon.PokemonType> getWEAKNESS() { //returns the weaknesses of the Pokemon
+	public Set<Pokemon.PokemonType> getWeakness() { //returns the weaknesses of the Pokemon
 		return weakness;
 	}
-	public Set<Pokemon.PokemonType> getRESISTANCE() { //returns the resistances of the Pokemon
+	public Set<Pokemon.PokemonType> getResistance() { //returns the resistances of the Pokemon
 		return resistance;
 	}
-	public Set<Pokemon.PokemonType> getNOEFFECT() { //returns the types that have no effect on the Pokemon (can be empty)
+	public Set<Pokemon.PokemonType> getNoEffect() { //returns the types that have no effect on the Pokemon (can be empty)
 		return noEffect;
 	}
 	public int getAttack() { //returns the attack stat of the Pokemon
@@ -320,17 +320,20 @@ public class Pokemon {
 		return gender;
 	}
 	//finds the multiplier needed when a move of a specific type is used. can be 0.25, 0.5, 1, 2, or 4. will be 0 if the move has no effect. by default, multiplier is 1.
-	public int findMultiplier(Move m){
-		int multiplier = 1;
-		for (int i = 0; i < m.getType().size(); i++) {
-			if (weakness.contains(m.getType().get(i))) {
+	//for the findMultiplier method to find the multiplier, the type, or types if applicable, of the move are checked against the type, or types, of the current pokemon object.
+	public double findMultiplier(Move m){
+		double multiplier = 1;
+		//check if moveType is effective against the current pokemon object's type(s) and change multiplier accordingly.
+		for (PokemonType pt : m.getType()){
+			if (getWeakness().contains(pt)) {
 				multiplier*=2;
 			}
-			else if (resistance.contains(m.getType().get(i))) {
-				multiplier/=2;
+			if (getResistance().contains(pt)) {
+				multiplier*=0.5;
 			}
-			else if (noEffect.contains(m.getType().get(i))) {
+			if (getNoEffect().contains(pt)) {
 				multiplier = 0;
+				break;
 			}
 		}
 		return multiplier;

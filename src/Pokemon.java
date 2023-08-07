@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
+import java.lang.reflect.*;
 public class Pokemon {
 	public enum PokemonType { // 18 types (represented by enum constants)
 	    NORMAL,
@@ -43,8 +44,11 @@ public class Pokemon {
 	private static HashMap<PokemonType, List<PokemonType>> typeResistances = new HashMap<>();
 	private static HashMap<PokemonType, List<PokemonType>> typeNoEffects = new HashMap<>();
 	private int[] stats = new int[6]; //order is HP, Attack, Defense, SP. Attack, SP. Defense, and Speed. 
+	private int[] originalStats = new int[6]; //order is HP, Attack, Defense, SP. Attack, SP. Defense, and Speed. Used for resetting stats after battle/when withdrawn.
 	private Ability ability;
 	private boolean gender; //true -> female, false -> male
+	private StatusCondition status;
+	private boolean canMove;
 	
 	Set<PokemonType> weakness = new HashSet<PokemonType>(); //specific to each Pokemon, taken from the static HashMaps below
 	Set<PokemonType> resistance = new HashSet<PokemonType>();
@@ -129,11 +133,18 @@ public class Pokemon {
         //evolveFrom(scanner);
         health = he;
         stats[0] = he;
+		originalStats[0] = he;
 		stats[1] = attack;
+		originalStats[1] = attack;
 		stats[2] = defense;
+		originalStats[2] = defense;
 		stats[3] = spAtk;
+		originalStats[3] = spAtk;
 		stats[4] = spDef;
+		originalStats[4] = spDef;
         stats[5] = speed;
+		originalStats[5] = speed;
+
         for (int i = 0; i < getType().size(); i++) {
 			weakness.addAll(typeWeaknesses.get(this.getType().get(i)));
 			resistance.addAll(typeResistances.get(this.getType().get(i)));
@@ -147,42 +158,106 @@ public class Pokemon {
 	    map.put(key, new ArrayList<>(Arrays.asList(values)));
 	}
 	
-	public void setMoves(Scanner scanner) { //sets the moves of the pokemon
-	    String move;
-	    PokemonType type;
-	    Move m;
-	    for (int i = 0; i <= 3; i++) {
-	        System.out.println("Please enter in move number " + (i + 1) + " of " + getName());
-	        move = scanner.nextLine();
-	        System.out.println("Please enter in the type of that move");
-	        while (true){
-	            try {
-	                type = PokemonType.valueOf(scanner.nextLine().toUpperCase());
-	                break;
-	            } catch (IllegalArgumentException iae) {
-	                System.out.println("Not a valid type! Please try again");
-	            }
+	public void setMoves(Scanner scanner) { 
+		for (int i = 0; i < 4; i++) {
+			System.out.println("Please enter in the name of the " + ordinal(i + 1) + " move of " + getName());
+			
+			while (true) {
+				String move = scanner.nextLine();
+				String className = ValidMove.isValid(move, scanner); //checks if the move is valid
 
-	        }
-	        m = new Move(move, type);
-	        moves[i] = m;
-	    }
-	}
-	public void changeMove(Scanner scanner, Move newMove) { //changes a move to a new move
-		System.out.println("Which move would you like to replace? Choose from the following:");
-		System.out.println(Arrays.toString(moves));
-		String n = scanner.nextLine();
-		Move cMove = new Move(n, null);
-		boolean contains = Arrays.stream(moves).anyMatch(cMove::equals);
-		if (!contains) {
-			System.out.println("This Pokemon doesn't know that move.");
+				if (!className.equals("Invalid input.")) {
+					try {
+						Class<?> moveClass = Class.forName(className);  
+						Move m = (Move) moveClass.getDeclaredConstructor().newInstance(); 
+						moves[i] = m;
+						break;  // exit the loop when the move is successfully set
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				} else {
+					System.out.println("Not a valid move! Please try again");
+				}
+			}
 		}
-		else {
-			moves[Arrays.asList(moves).indexOf(cMove)] = newMove;
-			System.out.println("Congratulations! " + name + " has learned the move " + newMove+"!");
-		}
-		
 	}
+
+	private String ordinal(int i) {
+		switch (i) {
+			case 1: return "1st";
+			case 2: return "2nd";
+			case 3: return "3rd";
+			default: return i + "th";
+		}
+	}
+
+	public void changeMove(Scanner scanner) {
+    System.out.println("Which move would you like to replace? Choose from the following:");
+    System.out.println(Arrays.toString(moves));
+
+    Move[] cMoveWrapper = new Move[1];
+    String move, className;
+
+    while (true) {
+        move = scanner.nextLine();
+        className = ValidMove.isValid(move, scanner);
+
+        while (className.equals("Invalid input.")) {
+            System.out.println("Not a valid move! Please try again");
+            move = scanner.nextLine();
+            className = ValidMove.isValid(move, scanner);
+        }
+
+        try {
+            Class<?> moveClass = Class.forName(className);
+            cMoveWrapper[0] = (Move) moveClass.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;  // exit method if there's an error
+        }
+        boolean contains = Arrays.stream(moves).anyMatch(moveObj -> moveObj.equals(cMoveWrapper[0]));
+        if (!contains) {
+            break;
+        } else {
+            System.out.println("This Pokemon doesn't know that move. Please try again.");
+        }
+    }
+
+    System.out.println("Which move would you like " + getName() + " to learn?");
+    String newMoveName = scanner.nextLine();
+
+    Move nMove = null;
+    String classN = ValidMove.isValid(newMoveName, scanner);
+
+    while (classN.equals("Invalid input.")) {
+        System.out.println("Not a valid move! Please try again");
+        newMoveName = scanner.nextLine();
+        classN = ValidMove.isValid(newMoveName, scanner);
+    }
+
+    try {
+        Class<?> moveClass = Class.forName(classN);
+        nMove = (Move) moveClass.getDeclaredConstructor().newInstance();
+    } catch (Exception e) {
+        e.printStackTrace();
+        return;
+    }
+
+    int index = -1; 
+    for (int i = 0; i < moves.length; i++) { 
+        if (moves[i].equals(cMoveWrapper[0])) { 
+            index = i; 
+            break; 
+        }
+    }
+
+    if(index != -1) {
+        moves[index] = nMove;
+    }
+    System.out.println("Congratulations! " + getName() + " has learned the move " + newMoveName + "!");
+}
+
+
 	public void levelUp() { //levels up the Pokemon by 1
 		level++;
 	}
@@ -209,18 +284,9 @@ public class Pokemon {
 		return moves;
 	}
 
-	/*public String toString() { //TODO: Make this better
-		if (evolution.equals("Doesn't evolve into any Pokemon") && evolveFrom.equals("Doesn't evolve from any Pokemon")) {
-			return name + " - A " + type + " Type\nThe " + desc + " Pokemon\n" + evolveFrom + ", " + evolution + "\n\n" + extendedDesc+"\n\n"; 
-		}
-		else if(evolution.equals("Doesn't evolve into any Pokemon")) {
-			return name + " - A " + type + " Type\nThe " + desc + " Pokemon\n" + "Evolves from: " + evolveFrom + ", " + evolution + "\n\n" + extendedDesc+"\n\n"; 
-		}
-		else if (evolveFrom.equals("Doesn't evolve from any Pokemon")) {
-			return name + " - A " + type + " Type\nThe " + desc + " Pokemon\n" + evolveFrom + ", evolves into: " + evolution + "\n\n" + extendedDesc+"\n\n";
-		}
-		return name + " - A " + type + " Type\nThe " + desc + " Pokemon\n" + "Evolves from: " + evolveFrom + ", evolves into: " + evolution + "\n\n" + extendedDesc+"\n\n";
-	}*/
+	public String toString(){
+		return name;
+	}
 	public String getName() { //returns the name of the Pokemon
 		return name;
 	}
@@ -269,6 +335,14 @@ public class Pokemon {
 		}
 
 	    if (health - damage < 0) {
+	        health = 0;
+	    } else {
+	        health -= damage;
+	    }
+	}
+	//another doDamage method, but takes a number of damage instead (used for status effects)
+	public void doDamage(int damage) {
+		if (health - damage < 0) {
 	        health = 0;
 	    } else {
 	        health -= damage;
@@ -367,6 +441,30 @@ public class Pokemon {
 		}
 	}
 
+	public StatusCondition getStatusCondition() { //returns the status condition of the Pokemon
+		return status;
+	}
+	public void setStatus(StatusCondition s) { //sets the status condition of the Pokemon
+		status = s;
+	}
+	public void removeStatus() { //removes the status condition of the Pokemon
+		status = null;
+	}
+	public void setCanMove(boolean b){
+		canMove = b;
+	}
+	public boolean getCanMove(){
+		return canMove;
+	}
+	//method to reset all values of the pokemon that may have been impacted by a battle, along with stats that may have been lowered or raised
+	public void reset() {
+		health = stats[0];
+		status = null;
+		canMove = true;
+		for (int i = 1; i < stats.length; i++) {
+			stats[i] = originalStats[i];
+		}
+	}
 }
 
 class PartnerPokemon extends Pokemon{ //this class is for the Pokemon that the player has as a partner
@@ -379,19 +477,6 @@ class PartnerPokemon extends Pokemon{ //this class is for the Pokemon that the p
 	}
 	public String getNickname() { //returns the nickname of the Pokemon
 		return nickname;
-	}
-	@Override
-	public String toString() { //modified toString from Pokemon class
-		if (nextEvolution().equals("Doesn't evolve into any Pokemon") && previousEvolution().equals("Doesn't evolve from any Pokemon")) {
-			return nickname + "(" + getName() + ") - A " + getType() + " Type\nThe " + getClassification() + " Pokemon\n" + previousEvolution() + ", " + nextEvolution() + "\n\n" + getDescription()+"\n\n"; 
-		}
-		else if(nextEvolution().equals("Doesn't evolve into any Pokemon")) {
-			return nickname + "(" + getName() + ") - A " + getType() + " Type\nThe " + getClassification() + " Pokemon\n" + "Evolves from: " + previousEvolution() + ", " + nextEvolution() + "\n\n" + getDescription()+"\n\n"; 
-		}
-		else if (previousEvolution().equals("Doesn't evolve from any Pokemon")) {
-			return nickname + "(" + getName() + ") - A " + getType() + " Type\nThe " + getClassification() + " Pokemon\n" + previousEvolution() + ", evolves into: " + nextEvolution() + "\n\n" + getDescription()+"\n\n";
-		}
-		return nickname + "(" + getName() + ") - A " + getType() + " Type\nThe " + getClassification() + " Pokemon\n" + "Evolves from: " + previousEvolution() + ", evolves into: " + nextEvolution() + "\n\n" + getDescription()+"\n\n";
 	}
 }
 

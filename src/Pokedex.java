@@ -24,7 +24,7 @@ public class Pokedex {
 		allPokemon.add(p);
 	}
 	public static Pokedex getPokedex(){
-		if (allPokemon == null) {
+		if (pokedex == null) {
 			pokedex = new Pokedex();
 		}
 		return pokedex;

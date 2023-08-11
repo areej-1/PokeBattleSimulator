@@ -2,10 +2,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 public class Battle {
-	private Trainer trainer1;
-	private Trainer trainer2;
-	BattleContext bc_trainer1;
-	BattleContext bc_trainer2;
+	private static Trainer trainer1;
+	private static Trainer trainer2;
+	private static BattleContext bc_trainer1;
+	private static BattleContext bc_trainer2;
+	private static Trainer currentTrainer;
+	private static int currentP;
+	private static boolean trainer1Turn;
 	private final String[] options = {"heal", "attack", "swap"};
 	public Battle(Trainer t1, Trainer t2) {
 		trainer1 = t1;
@@ -14,8 +17,12 @@ public class Battle {
 		bc_trainer2 = new BattleContext(trainer2.party()[0], trainer1.party()[0]);
 
 	}
+	private String inputHandler(String input, Scanner scanner){
+		return Matcher.isMatch(input, scanner);
+	}
 
-	private void heal(String input, int currentP, Trainer t) { //heal method. takes in input, current pokemon, and trainer, and heals the pokemon depending on the item (input)
+	private void heal(String input, int currentP, Trainer t, Scanner scanner) { //heal method. takes in input, current pokemon, and trainer, and heals the pokemon depending on the item (input)
+		input = inputHandler(input, scanner);
 		switch(input) {
 			case "Potion": //heals pokemon by 20 HP (as long as it's not fainted)
 				try {
@@ -112,10 +119,15 @@ public class Battle {
 			System.out.println("What move should " + curr.party()[p].getName() + " use?");
 			System.out.println(curr.party()[p].getMoves());
 			String n = scanner.nextLine();
-			targetMove = Arrays.stream(curr.party()[p].moves())
-	                .filter(move -> n.equals(move.getName()))
+			if (!inputHandler(n, scanner).contains("invalid")){
+				targetMove = Arrays.stream(curr.party()[p].moves())
+	                .filter(move -> (inputHandler(n, scanner)).equals(move.getName()))
 	                .findFirst()
 	                .orElse(null);
+			} else {
+				System.out.println(curr.party()[p].getName() + " doesn't have that move! Please try again.");
+				continue;
+			}
 
 	        if (targetMove != null) {
 	            break;
@@ -135,6 +147,43 @@ public class Battle {
 		}
 		other.party()[opP].doDamage(bc.getDamage(), targetMove); 
 	}
+	public static void swapPokemon(Scanner scanner){ //swapping pokemon method to be used in other classes
+		int nextP = 0; //placeholder value
+		boolean isDone = false;
+		while (true) {
+			System.out.println("Which Pokemon should " + currentTrainer.getName() + " switch to?");
+			System.out.println(Arrays.toString(currentTrainer.party()));
+			String n = scanner.nextLine();
+			int index = 0;
+			for (Pokemon p : currentTrainer.party()) {
+				if (p.getName().equals(n) && p.healthVal() > 0) {
+					nextP = index;
+					isDone = true;
+					break;
+				}
+				index++;
+				if (isDone){
+					break;
+				}
+			}
+			if (isDone){
+				break;
+			}
+			System.out.println("That Pokemon isn't in your party or is already fainted, " + currentTrainer.getName() + "!");
+		}
+
+		System.out.println(currentTrainer.getName() + " sent out " + currentTrainer.party()[nextP].getName() + "!");
+
+		if (trainer1Turn){
+			bc_trainer1.setUser(trainer1.party()[nextP]);
+			bc_trainer2.setTarget(trainer1.party()[nextP]);
+		}
+		else {
+			bc_trainer2.setUser(trainer2.party()[nextP]);
+			bc_trainer1.setTarget(trainer2.party()[nextP]);
+		}
+		currentP = nextP;
+	}
 	private int switchPokemon(Trainer t, int currentP, Scanner scanner) { //switchPokemon method. takes in the trainer, current pokemon, and scanner, and switches the current pokemon to another pokemon in the party
 		int nextP = nextPokemon(t, currentP, scanner);
 		System.out.println(t.getName() + " withdrew " + t.party()[currentP].getName() + "!");
@@ -146,6 +195,7 @@ public class Battle {
 			System.out.println("Which Pokemon should " + t.getName() + " switch to?");
 			System.out.println(Arrays.toString(t.party()));
 			String n = scanner.nextLine();
+			n = inputHandler(n, scanner);
 			int index = 0;
 			for (Pokemon p : t.party()) {
 				if (p.getName().equals(n) && p.healthVal() > 0) {
@@ -166,9 +216,9 @@ public class Battle {
 	    bc_trainer1.setTurnNumber(0);
 		bc_trainer2.setTurnNumber(0);
 	    boolean initiative = trainer1.party()[currentP1].getSpeed() > trainer2.party()[currentP2].getSpeed(); //
-	    boolean trainer1Turn = trainer1.party()[currentP1].getSpeed() == trainer2.party()[currentP2].getSpeed() ? initiative : trainer1.party()[currentP1].getSpeed() > trainer2.party()[currentP2].getSpeed();
+	    trainer1Turn = trainer1.party()[currentP1].getSpeed() == trainer2.party()[currentP2].getSpeed() ? initiative : trainer1.party()[currentP1].getSpeed() > trainer2.party()[currentP2].getSpeed();
 	    while (!trainer1.partyFainted() && !trainer2.partyFainted()) {
-	        Trainer currentTrainer = trainer1Turn ? trainer1 : trainer2;
+	        currentTrainer = trainer1Turn ? trainer1 : trainer2;
 	        Trainer otherTrainer = trainer1Turn ? trainer2 : trainer1;
 	        int currentP = trainer1Turn ? currentP1 : currentP2;
 	        int otherP = trainer1Turn ? currentP2 : currentP1;
@@ -227,7 +277,7 @@ public class Battle {
 	        			        if (currentTrainer.bagg().contains("Revive")) {
 	        			            // If all conditions are met, then we can use a Revive.
 	        			        	System.out.println("Revive was used on " + input + "!");
-	        			        	heal("Revive", i, currentTrainer);
+	        			        	heal("Revive", i, currentTrainer, scanner);
 	        			        } else {
 	        			            System.out.println("You have no Revives in your inventory.");
 	        			        }
@@ -240,7 +290,7 @@ public class Battle {
 	            else {
 	            	while (true) {
 	            		try {
-	        				heal(input, currentP, currentTrainer);
+	        				heal(input, currentP, currentTrainer, scanner);
 	        				break;
 	        			} catch (IllegalArgumentException iae) {
 	        				System.out.println("That item doesn't exist.");

@@ -13,6 +13,7 @@ public class tester {
 		Pokemon f = new Pokemon("Staraptor", "Normal/Flying", 63, "Predator", 374, 220, 130, 94, 112, 159, null, true, scanner);
 		Pokemon s = new Pokemon("Luxray", "Electric", 66, "Gleam Eyes", 364, 220, 146, 175, 146, 137, null, true, scanner);
 		h.setParty(b, c, s, k, f);
+		h.swapPositions(m, c); 
 		h.setBag("Potion", "Potion", "Potion", "Super Potion", "Max Potion", "Max Potion", "Max Potion", "Revive"); //set bag
 		
 		PartnerPokemon n = new PartnerPokemon("Infernape", "Fire/Fighting", 61, "Flame", 186, 160, 109, 130, 111, 175, blaze, false, scanner);
@@ -33,5 +34,6 @@ public class tester {
 		Battle bte = new Battle(h, a); //constructor for battle is (trainer1, trainer2)
 		System.out.println(bte.battle(scanner)); //battle
 		scanner.close();
+		System.out.println(h.party()[0].healthVal());
 	}
 }

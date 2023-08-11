@@ -98,13 +98,29 @@ public class Trainer {
 	    // Print the result
 	    return result.toString();
 	}
-	public void swapPokemon(Pokemon p, String name) {
+	public void swapPokemon(Pokemon p, String name) { // Swaps a Pokemon in the party with another Pokemon. name is the name of the Pokemon to be swapped out, p is the Pokemon to be swapped in.
 		for (int i = 0; i < party.length; i++) {
 			if (party[i].getName().equals(name)) {
 				party[i] = p;
 				break;
 			}
 		}
+	}
+	public void swapPositions(Pokemon p1, Pokemon p2){
+		int index1 = 0;
+		int index2 = 0;
+		for (int i = 0; i < party.length; i++) {
+			if (party[i].getName().equals(p1.getName())) {
+				index1 = i;
+			}
+			if (party[i].getName().equals(p2.getName())) {
+				index2 = i;
+			}
+		}
+		Pokemon temp = party[index1];
+		party[index1] = party[index2];
+		party[index2] = temp;
+
 	}
 	public int getMoney() {
 		return pokedollars;

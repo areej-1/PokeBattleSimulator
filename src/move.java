@@ -52,15 +52,19 @@ public class Move {
 		int level = userPokemon.getLevel();
 		int attack = userPokemon.getAttack();
 		int defense = targetPokemon.getDefense();
-		int targets = 1, PB = 1, Weather = 1, GlaiveRush = 1, critical = 1;
-		//generate a random integer between 85 and 100, inclusive, then divide by 100. any decimals are rounded down to the nearest integer. defined as random
-		int random = (int)(Math.random() * 16 + 85);
+		int power = targetMove.getDamage();
+		double targets = 1;
+		double weather = 1;
+		double badge = 1;
+		double critical = 1; //wip, critical hits are not implemented yet
+		//random value between 0.85 and 1.00, inclusive
+		double random = Math.random() * (1.00 - 0.85) + 0.85;
 		//STAB is the same-type attack bonus. This is equal to 1.5 if the move's type matches any of the user's types, 2 if the user of the move additionally has Adaptability as a ability, and 1 otherwise or if the attacker and/or used move is typeless.
 		double STAB = userPokemon.getSTAB(targetMove);
 		double type = targetPokemon.findMultiplier(targetMove);
-		double burn = 1, other = 1, ZMove = 1, TeraShield = 1;
-
-		return ((2*level/5 + 2) * targetMove.damage * attack/defense/50 + 2)*targets*PB*Weather*GlaiveRush*critical*random*STAB*type*burn*other*ZMove*TeraShield;
+		double burn = 1;
+		double other = 1;
+		return ((((((((2*level)/5)+2)*power*attack)/defense)/50)+2)*targets*weather*badge*critical*random*STAB*type*burn*other);
 	}
 	//method to inflict any status effects that the move may have
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, Move targetMove) {
@@ -322,6 +326,8 @@ class UTurn extends Move{
 	//overwrite the inflictStatus method to inflict the status effect of u-turn
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, Move targetMove) {
 		//U-turn inflicts damage and then switches the user out for another Pokémon in the party. 
+
+		//Battle.swapPokemon(userPokemon, Battle.getTrainerPokemon(userPokemon.getTrainer(), 1));
 	}
 }
 

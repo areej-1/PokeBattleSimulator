@@ -1,8 +1,15 @@
 // generate.js 
+require('dotenv').config();
 const { Configuration, OpenAIApi } = require('openai');
 
+const apiKey = process.env.OPENAI_API_KEY;
+if (!apiKey) {
+    console.error("API Key not found!");
+    process.exit(1);
+}
+
 const configuration = new Configuration({
-  apiKey: 'key-here', // replace with your OpenAI key
+    apiKey: apiKey,
 });
 const openai = new OpenAIApi(configuration);
 

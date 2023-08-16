@@ -17,100 +17,172 @@ public class Battle {
 		bc_trainer2 = new BattleContext(trainer2.party()[0], trainer1.party()[0]);
 
 	}
+	//method to select a pokemon, and returns the index of the pokemon in the party. to be used for healing and reviving. takes in user input for the name of a pokemon, and returns the index of the pokemon in the party
+	private int selectPokemon(Trainer t, Scanner scanner){
+		System.out.println("Which pokemon would you like to use it on?");
+		String input = scanner.nextLine();
+		input = inputHandler(input, scanner);
+		while (true){
+			if (input.equals("invalid")) {
+				System.out.println("Invalid input! Please try again.");
+				input = scanner.nextLine();
+				input = inputHandler(input, scanner);
+			} else {
+				break;
+			}
+		}
+		for (int i = 0; i < t.party().length; i++){
+			if (t.party()[i].getName().equals(input)){
+				return i;
+			}
+		}
+		System.out.println("You don't have a Pokemon with that name! Please try again.");
+		return selectPokemon(t, scanner);
+	}
 	private String inputHandler(String input, Scanner scanner){
 		return Matcher.isMatch(input, scanner);
 	}
 
-	private void heal(String input, int currentP, Trainer t, Scanner scanner) { //heal method. takes in input, current pokemon, and trainer, and heals the pokemon depending on the item (input)
+	private void heal(String input, Trainer t, Scanner scanner) { //heal method. takes in input, current pokemon, and trainer, and heals the pokemon depending on the item (input)
 		input = inputHandler(input, scanner);
-		switch(input) {
-			case "Potion": //heals pokemon by 20 HP (as long as it's not fainted)
-				try {
-					t.bagg().removeItem("Potion", 1);
-					t.party()[currentP].heal(20);
-
-				} catch(IllegalArgumentException i) {
-					System.out.println("You don't have that item!");
-				}
+		int currentP;
+		while (true){
+			if (input.equals("invalid")) {
+				System.out.println("Invalid input! Please try again.");
+				input = scanner.nextLine();
+				input = inputHandler(input, scanner);
+			} else {
 				break;
-			case "Super Potion": //heals pokemon by 50 HP (as long as it's not fainted)
-				try {
-					t.bagg().removeItem("Super Potion", 1);
-					t.party()[currentP].heal(50);
-				} catch(IllegalArgumentException i) {
-					System.out.println("You don't have that item!");
-				}
-				break;
-			case "Hyper Potion": //heals pokemon by 200 HP (as long as it's not fainted)
-				try {
-					t.bagg().removeItem("Hyper Potion", 1);
-					t.party()[currentP].heal(200);
-				} catch(IllegalArgumentException i) {
-					System.out.println("You don't have that item!");
-				}
-				break;
-			case "Max Potion": //heals pokemon to full health (as long as it's not fainted)
-				try {
-					t.bagg().removeItem("Max Potion", 1);
-					t.party()[currentP].heal(t.party()[currentP].getMaxHP());
-				} catch(IllegalArgumentException i) {
-					System.out.println("You don't have that item!");
-				}
-				break;
-			case "Revive": //heals pokemon to half health, when fainted
-				try {
-					t.bagg().removeItem("Revive", 1);
-					t.party()[currentP].heal(t.party()[currentP].getMaxHP()/2);
-				} catch(IllegalArgumentException i) {
-					System.out.println("You don't have that item!");
-				}
-				break;
-			case "Max Revive": //heals pokemon to full health, when fainted
-				try {
-					t.bagg().removeItem("Max Revive", 1);
-					t.party()[currentP].heal(t.party()[currentP].getMaxHP());
-				} catch(IllegalArgumentException i) {
-					System.out.println("You don't have that item!");
-				}
-				break;
-			case "Full Restore": //heals pokemon to full health and removes status conditions (as long as it's not fainted)
-				try {
-					t.bagg().removeItem("Full Restore", 1);
-					t.party()[currentP].heal(t.party()[currentP].getMaxHP());
-				} catch(IllegalArgumentException i) {
-					System.out.println("You don't have that item!");
-				}
-				break;
-			default:
-				throw new IllegalArgumentException("Sorry-that item doesn't exist!");
+			}
 		}
 
-		System.out.println(t.party()[currentP].getName() + " is now at " + t.party()[currentP].healthVal() + " HP.");
-		
-
+		switch(input){
+			//compare input with names of items to heal with. first make sure that the item is in the bag, then heal the pokemon
+			case "Potion":
+				if (t.bagg().contains("Potion")){
+					currentP = selectPokemon(t, scanner);
+					System.out.println(t.getName() + " used a Potion.");
+					if (t.party()[currentP].healthVal() != 0 && t.party()[currentP].healthVal()!= t.party()[currentP].getMaxHP()){
+						System.out.println(t.party()[currentP].getName() + "'s HP has been restored.");
+					}
+					t.party()[currentP].heal(20);
+					t.bagg().removeItem("Potion", 1);
+				} else {
+					System.out.println("You don't have any potions! Please try again.");
+					heal(scanner.nextLine(), t, scanner);
+				}
+				break;
+			case "Super Potion":
+				currentP = selectPokemon(t, scanner);
+				if (t.bagg().contains("Super Potion")){
+					System.out.println(t.getName() + " used a Super Potion.");
+					if (t.party()[currentP].healthVal() != 0 && t.party()[currentP].healthVal()!= t.party()[currentP].getMaxHP()){
+						System.out.println(t.party()[currentP].getName() + "'s HP has been restored.");
+					}
+					t.party()[currentP].heal(50);
+					t.bagg().removeItem("Super Potion", 1);
+				} else {
+					System.out.println("You don't have any super potions! Please try again.");
+					heal(scanner.nextLine(), t, scanner);
+				}
+				break;
+			case "Hyper Potion":
+			
+				if (t.bagg().contains("Hyper Potion")){
+					currentP = selectPokemon(t, scanner);
+					System.out.println(t.getName() + " used a Hyper Potion.");
+					if (t.party()[currentP].healthVal() != 0 && t.party()[currentP].healthVal()!= t.party()[currentP].getMaxHP()){
+						System.out.println(t.party()[currentP].getName() + "'s HP has been restored.");
+					}
+					t.party()[currentP].heal(200);
+					t.bagg().removeItem("Hyper Potion", 1);
+				} else {
+					System.out.println("You don't have any hyper potions! Please try again.");
+					heal(scanner.nextLine(), t, scanner);
+				}
+				break;
+			case "Max Potion":
+				if (t.bagg().contains("Max Potion")){
+					currentP = selectPokemon(t, scanner);
+					System.out.println(t.getName() + " used a Max Potion.");
+					if (t.party()[currentP].healthVal() != 0 && t.party()[currentP].healthVal()!= t.party()[currentP].getMaxHP()){
+						System.out.println(t.party()[currentP].getName() + "'s HP has been restored.");
+					}
+					t.party()[currentP].heal(999);
+					t.bagg().removeItem("Max Potion", 1);
+				} else {
+					System.out.println("You don't have any max potions! Please try again.");
+					heal(scanner.nextLine(), t, scanner);
+				}
+				break;
+			case "Full Restore":
+				if (t.bagg().contains("Full Restore")){
+					currentP = selectPokemon(t, scanner);
+					System.out.println(t.getName() + " used a Full Restore.");
+					if (t.party()[currentP].healthVal() != 0 && t.party()[currentP].healthVal()!= t.party()[currentP].getMaxHP()){
+						System.out.println(t.party()[currentP].getName() + "'s HP has been restored.");
+					}
+					t.party()[currentP].heal(999);
+					t.bagg().removeItem("Full Restore", 1);
+					//check if the pokemon has any status conditions. if so, remove them
+					if (t.party()[currentP].getStatusCondition() != null){
+						t.party()[currentP].setStatus(null);
+						System.out.println(t.party()[currentP].getName() + " was cured of its status condition."); //in the future, replace 'status condition' with the actual status condition's name. its better
+					}
+				} else {
+					System.out.println("You don't have any full restores! Please try again.");
+					heal(scanner.nextLine(), t, scanner);
+				}
+				break;
+			case "Revive":
+				if (t.bagg().contains("Revive")){
+					currentP = selectPokemon(t, scanner);
+					System.out.println(t.getName() + " used a Revive.");
+					if (t.party()[currentP].healthVal() == 0){
+						System.out.println(t.party()[currentP].getName() + " was revived!");
+					}
+					t.party()[currentP].revive("Revive");
+					t.bagg().removeItem("Revive", 1);
+				} else {
+					System.out.println("You don't have any revives! Please try again.");
+					heal(scanner.nextLine(), t, scanner);
+				}
+				break;
+			case "Max Revive":
+				if (t.bagg().contains("Max Revive")){
+					currentP = selectPokemon(t, scanner);
+					System.out.println(t.getName() + " used a Max Revive.");
+					if (t.party()[currentP].healthVal() == 0){
+						System.out.println(t.party()[currentP].getName() + " was revived!");
+					}
+					t.party()[currentP].revive("Max Revive");
+					t.bagg().removeItem("Max Revive", 1);
+				} else {
+					System.out.println("You don't have any max revives! Please try again.");
+					heal(scanner.nextLine(), t, scanner);
+				}
+				break;
+			case "Full Heal":
+				if (t.bagg().contains("Full Heal")){
+					currentP = selectPokemon(t, scanner);
+					//check if the pokemon has any status conditions. if so, remove them. if not, just print that the item had no effect
+					if (t.party()[currentP].getStatusCondition() != null){
+						t.party()[currentP].setStatus(null);
+						System.out.println(t.getName() + " used a Full Heal.");
+						System.out.println(t.party()[currentP].getName() + " was cured of its status condition."); //in the future, replace 'status condition' with the actual status condition's name. its better
+					} else {
+						System.out.println(t.getName() + " used a Full Heal.");
+						System.out.println("But it had no effect!");
+					}
+				} else {
+					System.out.println("You don't have any full heals! Please try again.");
+					heal(scanner.nextLine(), t, scanner);
+				}
+				break;
+		}
 		
 	}
-	//new implementation of attack method? tbd lol- if added, need to update the battle method, and add any methods that are needed (ie. pokemon class --> attack method)
-	/*private void attack(int currentP, Trainer t, Pokemon opponentP, Trainer opponentT, Scanner scanner) {
-		System.out.println(t.getName() + " used " + t.party()[currentP].getMove() + "!");
-		int damage = t.party()[currentP].attack(opponentP);
-		System.out.println(t.party()[currentP].getName() + " dealt " + damage + " damage to " + opponentP.getName() + "!");
-		if (opponentP.healthVal() == 0) {
-			System.out.println(opponentP.getName() + " fainted!");
-			if (opponentT.party().length == 1) {
-				System.out.println(opponentT.getName() + " is out of usable Pokemon!");
-				System.out.println(t.getName() + " wins!");
-				System.exit(0);
-			}
-			else {
-				int nextP = nextPokemon(opponentT, 0, scanner);
-				opponentT.party()[nextP].heal(opponentT.party()[nextP].getMaxHP());
-				System.out.println(opponentT.getName() + " sent out " + opponentT.party()[nextP].getName() + "!");
-				bc_trainer1 = new BattleContext(trainer1.party()[0], trainer2.party()[0]);
-				bc_trainer2 = new BattleContext(trainer2.party()[0], trainer1.party()[0]);
-			}
-		}
-	}*/
+
 	private void attack(int p, Trainer curr, int opP, Trainer other, Scanner scanner) { //attack method. takes in the current pokemon, current trainer, opponent pokemon, opponent trainer, and scanner, and attacks the opponent pokemon
 		Move targetMove;
 		//if curr == trainer1, then bc = bc_trainer1, else bc = bc_trainer2
@@ -250,11 +322,13 @@ public class Battle {
 					//check which trainer's turn it is, then set the user pokemon (for the opposing/other trainer's battle context) and target pokemon (for the current trainer's battle context) in the battle context accordingly, and swap the current pokemon for the trainer whose turn it is
 					
 					if (trainer1Turn) { //if its trainer1's turn
+						trainer2.party()[currentP2].removeStatus(); //remove the status of the fainted pokemon (for trainer2)
 						currentP2 = switchPokemon(otherTrainer, otherP, scanner); //swap the current pokemon for trainer2
 						bc_trainer2.setTurnNumber(0); //reset the turn number for trainer2's battle context (since the pokemon is switched)
 						bc_trainer1.setTarget(otherTrainer.party()[currentP2]); //set the target pokemon for trainer1's battle context to the pokemon that trainer2 swapped in
 						bc_trainer2.setUser(otherTrainer.party()[currentP2]); //set the user pokemon for trainer2's battle context to the pokemon that trainer2 swapped in
 					} else { //if its trainer2's turn
+						trainer1.party()[currentP1].removeStatus(); //remove the status of the fainted pokemon (for trainer1)
 						currentP1 = switchPokemon(otherTrainer, otherP, scanner); //swap the current pokemon for trainer1
 						bc_trainer1.setTurnNumber(0); //reset the turn number for trainer1's battle context (since the pokemon is switched)
 						bc_trainer2.setTarget(otherTrainer.party()[currentP1]); //set the target pokemon for trainer2's battle context to the pokemon that trainer1 swapped in
@@ -267,36 +341,7 @@ public class Battle {
 	        } else if (input.equals("heal")) { //if the user inputs heal, ask them which item they want to use
 	            System.out.println("Which item would you like to use?\n" + currentTrainer.items());		
 	            input = scanner.nextLine();
-	            if (input.equals("Revive")) {
-	        		System.out.println("Which Pokemon would you like to revive?\n" + Arrays.toString(currentTrainer.fainted()));
-	        		input = scanner.nextLine();
-	        		for (int i = 0; i < currentTrainer.party().length; i++) {
-	        			    // Checking if the Pokémon's name matches the input and if it has fainted.
-	        			    if (currentTrainer.party()[i].getName().equals(input) && currentTrainer.party()[i].healthVal() == 0) {
-	        			        // Now also checking if the Trainer has a Revive in their inventory.
-	        			        if (currentTrainer.bagg().contains("Revive")) {
-	        			            // If all conditions are met, then we can use a Revive.
-	        			        	System.out.println("Revive was used on " + input + "!");
-	        			        	heal("Revive", i, currentTrainer, scanner);
-	        			        } else {
-	        			            System.out.println("You have no Revives in your inventory.");
-	        			        }
-	        			    } else if (currentTrainer.party()[i].getName().equals(input) && currentTrainer.party()[i].healthVal() != 0) {
-	        			        System.out.println("You cannot use a Revive on a Pokemon that hasn't fainted.");
-	        			    }
-	        			}
-	        		}
-
-	            else {
-	            	while (true) {
-	            		try {
-	        				heal(input, currentP, currentTrainer, scanner);
-	        				break;
-	        			} catch (IllegalArgumentException iae) {
-	        				System.out.println("That item doesn't exist.");
-	        			}
-	            	}
-	            }
+				heal(input, currentTrainer, scanner);
 	        } else if (input.equals("swap")) {
 	            if (trainer1Turn) {
 	                currentP1 = switchPokemon(currentTrainer, currentP, scanner);

@@ -2,7 +2,7 @@
 const { Configuration, OpenAIApi } = require('openai');
 
 const configuration = new Configuration({
-  apiKey: 'key-is-here', // replace with your OpenAI key
+  apiKey: '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', // replace with your OpenAI key
 });
 const openai = new OpenAIApi(configuration);
 
@@ -17,7 +17,7 @@ const openai = new OpenAIApi(configuration);
   const messages = [
     {
       role: 'system',
-      content: 'This is part of a text-based Pokemon game. You are to, given user input, which will either be a move name or an item name or a pokemon name, check if such a name exists in the given database. If it does exist, return the name in the proper format (capitalized, spellchecked). Otherwise, simply return: \'invalid.\' The database for Pokemon names is: Empoleon, Infernape, Mamoswine, Piloswine, Staraptor, Lucario, Garchomp, Luxray. The database for Pokemon moves is: Extreme Speed, Roost, U-turn, Volt Switch, Avalanche, Waterfall, Swords Dance, Dragon Claw, Aerial Ace, Brave Bird, Iron Tail, Crunch, Thunder Fang, Dark Pulse, Flash Cannon, Aura Sphere, Ice Shard, Stone Edge, Ice Fang, Close Combat, Flare Blitz, Thunder Punch, Earthquake, Ice Beam, Thunderbolt, Surf. The database for item names is: Potion, Super Potion, Hyper Potion, Max Potion, Revive, Max Revive, Full Restore',
+      content: 'This is part of a text-based Pokemon game. You are to, given user input, which will either be a move name or an item name or a pokemon name, check if such a name exists in the given database. If it does exist, return the name in the proper format (capitalized, spellchecked). Otherwise, simply return: \'invalid.\' The database for Pokemon names is: Empoleon, Infernape, Mamoswine, Piloswine, Staraptor, Lucario, Garchomp, Luxray. The database for Pokemon moves is: Extreme Speed, Roost, U-turn, Volt Switch, Avalanche, Waterfall, Swords Dance, Dragon Claw, Aerial Ace, Brave Bird, Iron Tail, Crunch, Thunder Fang, Dark Pulse, Flash Cannon, Aura Sphere, Ice Shard, Stone Edge, Ice Fang, Close Combat, Flare Blitz, Thunder Punch, Earthquake, Ice Beam, Thunderbolt, Surf. The database for item names is: Potion, Super Potion, Hyper Potion, Max Potion, Revive, Max Revive, Full Restore, Full Heal',
     },
     {
       role: 'user',

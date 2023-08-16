@@ -348,12 +348,33 @@ public class Pokemon {
 	        health -= damage;
 	    }
 	}
-	public void heal(int healAmount) { //heals the Pokemon by healAmount, but cannot exceed the max HP
+	public void heal(int healAmount) { //heals the Pokemon by healAmount, but cannot exceed the max HP. must be not fainted to heal
+		if (health == 0 || health == stats[0]) {
+			System.out.println("But it didn't have any effect...");
+			return;
+		}
 		if (health+healAmount > stats[0]) {
 			health = stats[0];
 		}
 		else {
 			health+=healAmount;
+		}
+	}
+	public void revive(String revive) { //revives the Pokemon to full health. must be fainted to revive
+		if (health != 0) {
+			System.out.println("But it didn't have any effect...");
+			return;
+		}
+		switch (revive){
+			case "Revive":
+				health = stats[0]/2; //revives to half health
+				break;
+			case "Max Revive":
+				health = stats[0]; //revives to full health
+				break;
+			default:
+				System.out.println("Invalid revive item.");
+				break;
 		}
 	}
 	public int getMaxHP() { //the max HP of the Pokemon

@@ -22,24 +22,36 @@ public class StatusCondition {
     }
     public void setBurned(boolean burned) {
         this.burned = burned;
+        if (burned) {
+            System.out.println(context.getUser().getName() + " was burned!");
+        }
     }
     public boolean isParalyzed() {
         return paralyzed;
     }
     public void setParalyzed(boolean paralyzed) {
         this.paralyzed = paralyzed;
+        if (paralyzed) {
+            System.out.println(context.getUser().getName() + " was paralyzed!");
+        }
     }
     public boolean isPoisoned() {
         return poisoned;
     }
     public void setPoisoned(boolean poisoned) {
         this.poisoned = poisoned;
+        if (poisoned) {
+            System.out.println(context.getUser().getName() + " was poisoned!");
+        }
     }
     public boolean isAsleep() {
         return asleep;
     }
     public void setAsleep(boolean asleep) {
         this.asleep = asleep;
+        if (asleep) {
+            System.out.println(context.getUser().getName() + " fell asleep!");
+        }
     }
     public boolean isFrozen() {
         return frozen;
@@ -48,6 +60,9 @@ public class StatusCondition {
         this.frozen = frozen;
         if (!frozen) {
             System.out.println(context.getUser().getName() + " thawed out!");
+        }
+        else {
+            System.out.println(context.getUser().getName() + " was frozen solid!");
         }
     }
 
@@ -108,6 +123,26 @@ public class StatusCondition {
         //also, frozen pokemon can't move
         System.out.println(pokemon.getName() + " is frozen solid! It can't move!");
         pokemon.setCanMove(false);
+    }
+    public void applyEffect(Pokemon pokemon){
+        //this method applies the effect of the status condition to the pokemon
+        if (pokemon.getStatusCondition() != null) {
+            if (isBurned()) {
+                burn(pokemon);
+            }
+            if (isPoisoned()) {
+                poisoned(pokemon);
+            }
+            if (isParalyzed()) {
+                paralyzed(pokemon);
+            }
+            if (isAsleep()) {
+                asleep(pokemon);
+            }
+            if (isFrozen()) {
+                frozen(pokemon);
+            }
+        }
     }
 
 

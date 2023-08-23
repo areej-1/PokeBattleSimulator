@@ -32,6 +32,7 @@ public class Pokemon {
 	
 	private String name;
 	private List<PokemonType> type;
+	private List<PokemonType> originalType;
 	private int level;
 	private String desc;
 	private String extendedDesc;
@@ -48,7 +49,8 @@ public class Pokemon {
 	private Ability ability;
 	private boolean gender; //true -> female, false -> male
 	private StatusCondition status;
-	private boolean canMove;
+	private boolean canMove = true;
+	private String item = null;
 	
 	Set<PokemonType> weakness = new HashSet<PokemonType>(); //specific to each Pokemon, taken from the static HashMaps below
 	Set<PokemonType> resistance = new HashSet<PokemonType>();
@@ -121,14 +123,17 @@ public class Pokemon {
         for (String typeStr : types) {
             type.add(PokemonType.valueOf(typeStr.toUpperCase()));
         }
+		originalType = new ArrayList<>(type);
         
         level = lvl;
         desc = d;
         try {
             extendedDesc = WebScraper.readDescription(name.toLowerCase());
         } catch (IOException e) {
-            e.printStackTrace();
-        }
+            System.out.println("Error reading extended description for " + name);
+        } catch (NullPointerException npe){
+			System.out.println("Error reading extended description for " + name);
+		}
         //evolves(scanner);
         //evolveFrom(scanner);
         health = he;
@@ -485,6 +490,28 @@ public class Pokemon {
 		for (int i = 1; i < stats.length; i++) {
 			stats[i] = originalStats[i];
 		}
+	}
+	public void removeType(PokemonType pt) { //removes a type from the Pokemon
+		type.remove(pt);
+	}
+	//method to reset values/typings at the end of each turn
+	public void endTurnReset(){
+		//check the originalType list to see if any types are missing; if so, add them back
+		for (PokemonType pt : originalType){
+			if (!type.contains(pt)){
+				type.add(pt);
+			}
+		}
+		//set canMove to true (if it was caused by flinching or paralysis)
+		if (status == null || status.isParalyzed()){
+			canMove = true;
+		}
+	}
+	public void setItem(String i) { //sets the held item of the Pokemon
+		item = i;
+	}
+	public String getItem() { //returns the held item of the Pokemon
+		return item;
 	}
 }
 

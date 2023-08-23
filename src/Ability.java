@@ -14,6 +14,7 @@ class HugePower implements Ability { //Huge Power: "Doubles the Pokémon's Attac
     @Override
     public void applyEffect(String event, BattleContext context) { //check if the event is "stats modification". if so, multiply the user's attack by 2
         if ("stats modification".equals(event)) {
+			System.out.println("Huge Power activated!");
             context.getUser().setAttack(context.getUser().getAttack() * 2);
         }
     }
@@ -23,6 +24,7 @@ class Intimidate implements Ability {
 	@Override
 	public void applyEffect(String event, BattleContext context) { //check if the event is "stats modification". if so, divide the target's attack by 2
 		if ("stats modification".equals(event)) {
+			System.out.println("Intimidate activated!");
 			context.getTarget().setAttack(context.getTarget().getAttack() / 2);
 		}
 	}
@@ -140,15 +142,15 @@ class Justified implements Ability{
 	}
 }
 //Rattled: "The Pokémon gets scared when hit by a Dark-, Ghost-, or Bug-type move or if intimidated, which boosts its Speed stat."
-/*class Rattled implements Ability{
+class Rattled implements Ability{
 	@Override
 	public void applyEffect(String event, BattleContext context) { //check if the event is "damage calculation" and if the move type contains DARK, GHOST, or BUG or if the user is intimidated. if so, multiply the user's speed by 1.5
-		if ("damage calculation".equals(event) && (context.getMove().getType().contains(Pokemon.PokemonType.DARK) || context.getMove().getType().contains(Pokemon.PokemonType.GHOST) || context.getMove().getType().contains(Pokemon.PokemonType.BUG) || context.getUser().isIntimidated())) {
+		if ("damage calculation".equals(event) && (context.getMove().getType().contains(Pokemon.PokemonType.DARK) || context.getMove().getType().contains(Pokemon.PokemonType.GHOST) || context.getMove().getType().contains(Pokemon.PokemonType.BUG) /*|| context.getUser().isIntimidated()*/)) {
 			System.out.println("Rattled activated!");
 			context.getUser().setSpeed((int)(context.getUser().getSpeed() * 1.5));
 		}
 	}
-}*/
+}
 //Poison Heal: "Restores HP if the Pokémon is poisoned, instead of losing HP."
 //Note that to check if a Pokemon is poisoned, first grab its status condition, then run the isPoisoned() method on it (e.g. context.getUser().getStatus().isPoisoned())
 class PoisonHeal implements Ability{
@@ -190,6 +192,21 @@ class Defeatist implements Ability{
 			System.out.println("Defeatist activated!"); 
 			context.getUser().setAttack(context.getUser().getAttack() / 2); 
 			context.getUser().setSpAtk(context.getUser().getSpAtk() / 2);
+		}
+	}
+}
+class Rivalry implements Ability{ //Rivalry: "Becomes competitive and deals more damage to Pokemon of the same gender, but deals less to Pokemon of the opposite gender."
+	@Override
+	public void applyEffect(String event, BattleContext context){
+		if ("damage calculation".equals(event)) {
+			if (context.getUser().getGender() == context.getTarget().getGender()) {
+				System.out.println("Rivalry activated!");
+				context.setDamage(context.getDamage() * 1.25);
+			}
+			else if (context.getUser().getGender() != context.getTarget().getGender()) {
+				System.out.println("Rivalry activated!");
+				context.setDamage(context.getDamage() * 0.75);
+			}
 		}
 	}
 }

@@ -106,7 +106,7 @@ public class Trainer {
 			}
 		}
 	}
-	public void swapPositions(Pokemon p1, Pokemon p2){
+	public void swapPositions(Pokemon p1, Pokemon p2){ 
 		int index1 = 0;
 		int index2 = 0;
 		for (int i = 0; i < party.length; i++) {

@@ -40,24 +40,41 @@ public class WebScraper {
      
     }
     public static String readDescription(String name) throws IOException{
-    	String url = "https://www.pokemon.com/us/pokedex/"+name;
+        String fullText = "";
+        try {
+            String url = "https://bulbapedia.bulbagarden.net/wiki/"+name+"_(Pok%C3%A9mon)";
+            Document document = Jsoup.connect(url).get();
 
-        // Fetch and parse the HTML using Jsoup
-        Document document = Jsoup.connect(url).get();
+            // Find the 'Biology' header
+            Element biologyHeader = document.select("span#Biology").first().parent();
 
-        // Look for the specific element using its class name
-        Element element = document.selectFirst(".version-x.active");
+            // Find the next sibling that is a paragraph
+            Element firstParagraph = biologyHeader.nextElementSibling();
+            
+            // Check if the first paragraph is not null
+            if (firstParagraph != null) {
+                String firstParagraphText = firstParagraph.text();
 
-        // Get the text content of the element
-        String content = element.text();
+                // Find the next sibling that is also a paragraph (assumes the second paragraph is immediately after the first)
+                Element secondParagraph = firstParagraph.nextElementSibling();
+                
+                // Check if the second paragraph is not null
+                if (secondParagraph != null) {
+                    String secondParagraphText = secondParagraph.text();
 
-        
-        Element e = document.selectFirst(".version-y");
+                    // Combine the first and second paragraphs
+                    fullText = firstParagraphText + "\n\n" + secondParagraphText;
 
-        // Get the text content of the element
-        content += "\n" + e.text();
-
-        // Print the content
-        return content;
+                    
+                } else {
+                    return (firstParagraphText);
+                }
+            } else {
+                return ("First paragraph not found.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return fullText;
     }
 }

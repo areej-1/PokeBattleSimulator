@@ -1,18 +1,23 @@
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import org.checkerframework.checker.units.qual.s;
+
 public class Move {
 	private ArrayList<Pokemon.PokemonType> type = new ArrayList<Pokemon.PokemonType>();
 	private String name;
 	private int damage;
 	private double criticalPercentage = 0.0416666666666667; //default is 1/24
-	private int accuracy;
-	public Move(String n, int damage, Pokemon.PokemonType ... t) {
+	private int baseAccuracy;
+	private boolean usesAccuracy = true;
+	public Move(String n, int damage, int baseAccuracy, boolean usesAccuracy, Pokemon.PokemonType ... t) {
 		for (Pokemon.PokemonType type : t) {
 			this.type.add(type);
 		}
 		name = n;
 		this.damage = damage;
+		this.usesAccuracy = usesAccuracy;
+		this.baseAccuracy = baseAccuracy;
 	}
 	public ArrayList<Pokemon.PokemonType> getType() {
 		return type;
@@ -66,11 +71,11 @@ public class Move {
 		}
 	}
 	//method to determine the move accuracy
-	/*public int accuracy(Pokemon userPokemon, Pokemon targetPokemon){
-		accuracy*
-		return 100;
-	}*/ //wip
-	public double damageToInflict(Pokemon userPokemon, Pokemon targetPokemon) {
+	public double accuracy(Pokemon userPokemon, Pokemon targetPokemon){
+		double stagemultiplier = Pokemon.getValue(userPokemon.getAccuracyStage()-targetPokemon.getEvasionStage());
+		return baseAccuracy*stagemultiplier;
+	}
+	public double damageToInflict(Pokemon userPokemon, Pokemon targetPokemon) { //returns a -1.0 if the move misses, to be handled in the battle class
 		int level = userPokemon.getLevel();
 		int attack = userPokemon.getAttack();
 		int defense = targetPokemon.getDefense();
@@ -86,6 +91,13 @@ public class Move {
 		double type = targetPokemon.findMultiplier(this);
 		double burn = 1;
 		double other = 1;
+		//calculate whether or not the move hits
+		if (usesAccuracy) {
+			if (Math.random() > accuracy(userPokemon, targetPokemon)) {
+				System.out.println("The move missed!");
+				return -1.0;
+			}
+		}
 		if (critical == 1.5) {
 			System.out.println("A critical hit!");
 		}
@@ -100,7 +112,7 @@ public class Move {
 }
 class Surf extends Move {
 	public Surf() {
-		super("Surf", 90, Pokemon.PokemonType.WATER);
+		super("Surf", 90, 90, true, Pokemon.PokemonType.WATER);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of surf
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -109,7 +121,7 @@ class Surf extends Move {
 }
 class Thunderbolt extends Move {
 	public Thunderbolt() {
-		super("Thunderbolt", 90, Pokemon.PokemonType.ELECTRIC);
+		super("Thunderbolt", 90, 100, true, Pokemon.PokemonType.ELECTRIC);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of thunderbolt
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -121,7 +133,7 @@ class Thunderbolt extends Move {
 }
 class Flamethrower extends Move {
 	public Flamethrower() {
-		super("Flamethrower", 90,  Pokemon.PokemonType.FIRE);
+		super("Flamethrower", 90, 100, true, Pokemon.PokemonType.FIRE);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of flamethrower
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -134,7 +146,7 @@ class Flamethrower extends Move {
 }
 class IceBeam extends Move {
 	public IceBeam() {
-		super("Ice Beam", 90, Pokemon.PokemonType.ICE);
+		super("Ice Beam", 90, 100, true, Pokemon.PokemonType.ICE);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of ice beam
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -146,7 +158,7 @@ class IceBeam extends Move {
 }
 class Earthquake extends Move {
 	public Earthquake() {
-		super("Earthquake", 100, Pokemon.PokemonType.GROUND);
+		super("Earthquake", 100, 100, true, Pokemon.PokemonType.GROUND);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of earthquake
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -155,7 +167,7 @@ class Earthquake extends Move {
 }
 class ThunderPunch extends Move{
 	public ThunderPunch() {
-		super("Thunder Punch", 75, Pokemon.PokemonType.ELECTRIC);
+		super("Thunder Punch", 75, 100, true, Pokemon.PokemonType.ELECTRIC);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of thunder punch
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -168,7 +180,7 @@ class ThunderPunch extends Move{
 
 class FlareBlitz extends Move{
 	public FlareBlitz(){
-		super("Flare Blitz", 120, Pokemon.PokemonType.FIRE);
+		super("Flare Blitz", 120, 100, true, Pokemon.PokemonType.FIRE);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of flare blitz
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -187,7 +199,7 @@ class FlareBlitz extends Move{
 
 class CloseCombat extends Move{
 	public CloseCombat(){
-		super("Close Combat", 120, Pokemon.PokemonType.FIGHTING);
+		super("Close Combat", 120, 100, true, Pokemon.PokemonType.FIGHTING);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of close combat
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon,BattleContext bc) {
@@ -198,7 +210,7 @@ class CloseCombat extends Move{
 }
 class IceFang extends Move{
 	public IceFang(){
-		super("Ice Fang", 65, Pokemon.PokemonType.ICE);
+		super("Ice Fang", 65, 95, true, Pokemon.PokemonType.ICE);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of ice fang
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -215,7 +227,7 @@ class IceFang extends Move{
 
 class StoneEdge extends Move{
 	public StoneEdge(){
-		super("Stone Edge", 100, Pokemon.PokemonType.ROCK);
+		super("Stone Edge", 100, 80, true, Pokemon.PokemonType.ROCK);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of stone edge
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon,BattleContext bc) {
@@ -225,7 +237,7 @@ class StoneEdge extends Move{
 
 class IceShard extends Move{
 	public IceShard(){
-		super("Ice Shard", 40, Pokemon.PokemonType.ICE);
+		super("Ice Shard", 40, 100, true, Pokemon.PokemonType.ICE);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of ice shard
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon,BattleContext bc) {
@@ -237,7 +249,7 @@ class IceShard extends Move{
 
 class AuraSphere extends Move{
 	public AuraSphere(){
-		super("Aura Sphere", 80, Pokemon.PokemonType.FIGHTING);
+		super("Aura Sphere", 80, 0, false, Pokemon.PokemonType.FIGHTING);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of aura sphere
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -248,7 +260,7 @@ class AuraSphere extends Move{
 
 class FlashCannon extends Move{
 	public FlashCannon(){
-		super("Flash Cannon", 80, Pokemon.PokemonType.STEEL);
+		super("Flash Cannon", 80, 100, true, Pokemon.PokemonType.STEEL);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of flash cannon
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -261,7 +273,7 @@ class FlashCannon extends Move{
 
 class DarkPulse extends Move{
 	public DarkPulse(){
-		super("Dark Pulse", 80, Pokemon.PokemonType.DARK);
+		super("Dark Pulse", 80, 100, true, Pokemon.PokemonType.DARK);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of dark pulse
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon,BattleContext bc) {
@@ -274,7 +286,7 @@ class DarkPulse extends Move{
 
 class ThunderFang extends Move{
 	public ThunderFang(){
-		super("Thunder Fang", 65, Pokemon.PokemonType.ELECTRIC);
+		super("Thunder Fang", 65,95, true, Pokemon.PokemonType.ELECTRIC);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of thunder fang
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -290,7 +302,7 @@ class ThunderFang extends Move{
 
 class Crunch extends Move{
 	public Crunch(){
-		super("Crunch", 80, Pokemon.PokemonType.DARK);
+		super("Crunch", 80, 100, true, Pokemon.PokemonType.DARK);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of crunch
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -303,7 +315,7 @@ class Crunch extends Move{
 
 class IronTail extends Move{
 	public IronTail(){
-		super("Iron Tail", 100, Pokemon.PokemonType.STEEL);
+		super("Iron Tail", 100, 75, true, Pokemon.PokemonType.STEEL);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of iron tail
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -316,7 +328,7 @@ class IronTail extends Move{
 
 class BraveBird extends Move{
 	public BraveBird(){
-		super("Brave Bird", 120, Pokemon.PokemonType.FLYING);
+		super("Brave Bird", 120, 100, true, Pokemon.PokemonType.FLYING);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of brave bird
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -332,7 +344,7 @@ class BraveBird extends Move{
 
 class AerialAce extends Move{
 	public AerialAce(){
-		super("Aerial Ace", 60, Pokemon.PokemonType.FLYING);
+		super("Aerial Ace", 60, 0, false, Pokemon.PokemonType.FLYING);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of aerial ace
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -342,7 +354,7 @@ class AerialAce extends Move{
 
 class UTurn extends Move{
 	public UTurn(){
-		super("U-Turn", 70, Pokemon.PokemonType.BUG);
+		super("U-Turn", 70, 100, true, Pokemon.PokemonType.BUG);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of u-turn
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -355,7 +367,7 @@ class UTurn extends Move{
 
 class DragonClaw extends Move{
 	public DragonClaw(){
-		super("Dragon Claw", 80, Pokemon.PokemonType.DRAGON);
+		super("Dragon Claw", 80, 100, true, Pokemon.PokemonType.DRAGON);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of dragon claw
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -365,7 +377,7 @@ class DragonClaw extends Move{
 
 class SwordsDance extends Move{
 	public SwordsDance(){
-		super("Swords Dance", 0, Pokemon.PokemonType.NORMAL);
+		super("Swords Dance", 0, 0, false, Pokemon.PokemonType.NORMAL);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of swords dance
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -376,7 +388,7 @@ class SwordsDance extends Move{
 
 class Waterfall extends Move{
 	public Waterfall(){
-		super("Waterfall", 80, Pokemon.PokemonType.WATER);
+		super("Waterfall", 80, 100, true, Pokemon.PokemonType.WATER);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of waterfall
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon,BattleContext bc) {
@@ -390,7 +402,7 @@ class Waterfall extends Move{
 
 class Avalanche extends Move{
 	public Avalanche(){
-		super("Avalanche", 60, Pokemon.PokemonType.ICE);
+		super("Avalanche", 60, 100, true, Pokemon.PokemonType.ICE);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of avalanche
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon,BattleContext bc) {
@@ -403,7 +415,7 @@ class Avalanche extends Move{
 
 class VoltSwitch extends Move{
 	public VoltSwitch(){
-		super("Volt Switch", 70, Pokemon.PokemonType.ELECTRIC);
+		super("Volt Switch", 70, 100, true, Pokemon.PokemonType.ELECTRIC);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of volt switch
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -417,7 +429,7 @@ class VoltSwitch extends Move{
 
 class Roost extends Move{
 	public Roost(){
-		super("Roost", 0, Pokemon.PokemonType.FLYING);
+		super("Roost", 0, 0, false, Pokemon.PokemonType.FLYING);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of roost
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon,BattleContext bc) {
@@ -431,7 +443,7 @@ class Roost extends Move{
 
 class ExtremeSpeed extends Move{
 	public ExtremeSpeed(){
-		super("Extreme Speed", 80, Pokemon.PokemonType.NORMAL);
+		super("Extreme Speed", 80, 100, true, Pokemon.PokemonType.NORMAL);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of extreme speed
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -442,7 +454,7 @@ class ExtremeSpeed extends Move{
 
 class Protect extends Move{
 	public Protect(){
-		super("Protect", 0, Pokemon.PokemonType.NORMAL);
+		super("Protect", 0, 0, false, Pokemon.PokemonType.NORMAL);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of protect
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -453,7 +465,7 @@ class Protect extends Move{
 }
 class Fly extends Move{
 	public Fly(){
-		super("Fly", 90, Pokemon.PokemonType.FLYING);
+		super("Fly", 90, 95, true, Pokemon.PokemonType.FLYING);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of fly
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -464,7 +476,7 @@ class Fly extends Move{
 }
 class Acrobatics extends Move{
 	public Acrobatics(){
-		super("Acrobatics", 55, Pokemon.PokemonType.FLYING);
+		super("Acrobatics", 55, 100, true, Pokemon.PokemonType.FLYING);
 	}
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc){
 		//Acrobatics inflicts damage and has no secondary effect. 
@@ -476,7 +488,7 @@ class Acrobatics extends Move{
 }
 class ShadowClaw extends Move{
 	public ShadowClaw(){
-		super("Shadow Claw", 70, Pokemon.PokemonType.GHOST);
+		super("Shadow Claw", 70, 100, true, Pokemon.PokemonType.GHOST);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of shadow claw
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -486,7 +498,7 @@ class ShadowClaw extends Move{
 }
 class FlameWheel extends Move{
 	public FlameWheel(){
-		super("Flame Wheel", 60, Pokemon.PokemonType.FIRE);
+		super("Flame Wheel", 60, 100, true, Pokemon.PokemonType.FIRE);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of flame wheel
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {

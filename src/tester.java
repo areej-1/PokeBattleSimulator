@@ -26,15 +26,12 @@ public class tester {
 		Pokemon ma = new Pokemon("Piloswine", "Ice/Ground", 55, "Twin Tusk", 187, 141, 103, 95, 84, 104, null, false, scanner);
 		a.setParty(st, lux, ga, ma, luc);
 		a.setBag("Potion", "Potion", "Potion", "Super Potion", "Max Potion", "Max Potion", "Max Potion", "Revive"); //set bag
-		/*for (int i = 0; i <h.party().length; i++) {
+		for (int i = 0; i <h.party().length; i++) {
 			h.party()[i].setMoves(scanner); //set moves
 		}
 		for (int i = 0; i <a.party().length; i++) {
 			a.party()[i].setMoves(scanner); //set moves
-		}*/
-		h.party()[0].setMoves(scanner);
-		a.party()[0].setMoves(scanner);
-		h.party()[1].setMoves(scanner);
+		}
 		Battle bte = new Battle(h, a); //constructor for battle is (trainer1, trainer2)
 		System.out.println(bte.battle(scanner)); //battle
 		scanner.close();

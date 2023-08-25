@@ -51,6 +51,9 @@ public class Pokemon {
 	private StatusCondition status;
 	private boolean canMove = true;
 	private String item = null;
+
+	private int accuracy = 0;
+	private int evasion = 0;
 	
 	Set<PokemonType> weakness = new HashSet<PokemonType>(); //specific to each Pokemon, taken from the static HashMaps below
 	Set<PokemonType> resistance = new HashSet<PokemonType>();
@@ -512,6 +515,68 @@ public class Pokemon {
 	}
 	public String getItem() { //returns the held item of the Pokemon
 		return item;
+	}
+	public void modifyAccuracy(int i){ //modifies the accuracy of the Pokemon
+		//check if adding i will make the accuracy greater than 6 or less than -6; if so, set it to 6 or -6 respectively
+		if (accuracy+i > 6){
+			accuracy = 6;
+		}
+		else if (accuracy+i < -6){
+			accuracy = -6;
+		}
+		else {
+			accuracy+=i; //to lower, pass in a negative number; to raise, pass in a positive number
+		}
+	}
+	public void modifyEvasion(int i){ //modifies the evasion of the Pokemon
+		//check if adding i will make the evasion greater than 6 or less than -6; if so, set it to 6 or -6 respectively
+		if (evasion+i > 6){
+			evasion = 6;
+		}
+		else if (evasion+i < -6){
+			evasion = -6;
+		}
+		else {
+			evasion+=i; //to lower, pass in a negative number; to raise, pass in a positive number
+		}
+	}
+	public int getAccuracyStage(){ //returns the accuracy of the Pokemon
+		return accuracy;
+	}
+	public int getEvasionStage(){ //returns the evasion of the Pokemon
+		return evasion;
+	}
+	public static double getValue(int value){ 
+		//value is from -6 to 6, with 0 being the default value
+		switch(value){
+			case -6:
+				return 3/9.0;
+			case -5:
+				return 3/8.0;
+			case -4:
+				return 3/7.0;
+			case -3:
+				return 3/6.0;
+			case -2:
+				return 3/5.0;
+			case -1:
+				return 3/4.0;
+			case 1:
+				return 4/3.0;
+			case 2:
+				return 5/3.0;
+			case 3:
+				return 6/3.0;
+			case 4:
+				return 7/3.0;
+			case 5:
+				return 8/3.0;
+			case 6:
+				return 9/3.0;
+			default: //if value is 0
+				return 1;
+		}
+
 	}
 }
 

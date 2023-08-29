@@ -5,7 +5,7 @@ class Blaze implements Ability {  //Blaze: "Powers up Fire-type moves when the P
     @Override
     public void applyEffect(String event, BattleContext context) { //check if the event is "damage calculation" and if the types of the move contain FIRE and check if the user's HP is less than or equal to 33% of its max HP. if so, multiply the damage by 1.5
 		if ("damage calculation".equals(event) && context.getMove().getType().contains(Pokemon.PokemonType.FIRE) && context.getUser().healthVal() <= context.getUser().getMaxHP() / 3) {
-			System.out.println("Blaze activated!");
+			System.out.println(context.getUser()+ "'s Blaze activated!");
 			context.setDamage(context.getDamage() * 1.5);
 		}
     }
@@ -14,7 +14,7 @@ class HugePower implements Ability { //Huge Power: "Doubles the Pokémon's Attac
     @Override
     public void applyEffect(String event, BattleContext context) { //check if the event is "stats modification". if so, multiply the user's attack by 2
         if ("stats modification".equals(event)) {
-			System.out.println("Huge Power activated!");
+			System.out.println(context.getUser()+ "'s Huge Power activated!");
             context.getUser().setAttack(context.getUser().getAttack() * 2);
         }
     }
@@ -24,7 +24,7 @@ class Intimidate implements Ability {
 	@Override
 	public void applyEffect(String event, BattleContext context) { //check if the event is "stats modification". if so, divide the target's attack by 2
 		if ("stats modification".equals(event)) {
-			System.out.println("Intimidate activated!");
+			System.out.println(context.getUser()+ "'s Intimidate activated!");
 			context.getTarget().setAttack(context.getTarget().getAttack() / 2);
 		}
 	}
@@ -33,7 +33,7 @@ class Torrent implements Ability{ //Torrent: "Powers up Water-type moves when th
 	@Override
 	public void applyEffect(String event, BattleContext context) { //check if the event is "damage calculation" and if the types of the move contain WATER and check if the user's HP is less than or equal to 33% of its max HP. if so, multiply the damage by 1.5
 		if ("damage calculation".equals(event) && context.getMove().getType().contains(Pokemon.PokemonType.WATER) && context.getUser().healthVal() <= context.getUser().getMaxHP() / 3) {
-			System.out.println("Torrent activated!");
+			System.out.println(context.getUser()+ "'s Torrent activated!");
 			context.setDamage(context.getDamage() * 1.5);
 		}
 	}
@@ -43,7 +43,7 @@ class ThickFat implements Ability{
 	@Override
 	public void applyEffect(String event, BattleContext context) { //check if the event is "damage calculation" and if the types of the move contain FIRE or ICE. if so, divide the damage by 2
 		if ("damage calculation".equals(event) && (context.getMove().getType().contains(Pokemon.PokemonType.FIRE) || context.getMove().getType().contains(Pokemon.PokemonType.ICE))) {
-			System.out.println("Thick Fat activated!");
+			System.out.println(context.getUser()+ "'s Thick Fat activated!");
 			context.setDamage(context.getDamage() / 2);
 		}
 	}
@@ -53,7 +53,7 @@ class Adaptability implements Ability{
 	@Override
 	public void applyEffect(String event, BattleContext context) { //check if the event is "damage calculation" and if the types of the move contain the same type as the user. if so, multiply the damage by 2
 		if ("damage calculation".equals(event) && context.getMove().getType().contains(context.getUser().getType())) {
-			System.out.println("Adaptability activated!");
+			System.out.println(context.getUser()+ "'s Adaptability activated!");
 			context.setDamage(context.getDamage() * 2);
 		}
 	}
@@ -63,7 +63,7 @@ class Levitate implements Ability{
 	@Override
 	public void applyEffect(String event, BattleContext context) { //check if the event is "damage calculation" and if the types of the move contain GROUND. if so, set the damage to 0
 		if ("damage calculation".equals(event) && context.getMove().getType().contains(Pokemon.PokemonType.GROUND)) {
-			System.out.println("Levitate activated!");
+			System.out.println(context.getUser()+ "'s Levitate activated!");
 			context.setDamage(0);
 		}
 	}
@@ -73,7 +73,7 @@ class WaterAbsorb implements Ability{
 	@Override
 	public void applyEffect(String event, BattleContext context) { //check if the event is "damage calculation" and if the types of the move contain WATER. if so, set the damage to 0 and heal the user by the damage that would have been dealt
 		if ("damage calculation".equals(event) && context.getMove().getType().contains(Pokemon.PokemonType.WATER)) {
-			System.out.println("Water Absorb activated!");
+			System.out.println(context.getUser()+ "'s Water Absorb activated!");
 			context.getUser().heal((int)context.getDamage());
 			context.setDamage(0);
 		}
@@ -84,7 +84,7 @@ class VoltAbsorb implements Ability{
 	@Override
 	public void applyEffect(String event, BattleContext context) { //check if the event is "damage calculation" and if the types of the move contain ELECTRIC. if so, set the damage to 0 and heal the user by the damage that would have been dealt
 		if ("damage calculation".equals(event) && context.getMove().getType().contains(Pokemon.PokemonType.ELECTRIC)) {
-			System.out.println("Volt Absorb activated!");
+			System.out.println(context.getUser()+ "'s Volt Absorb activated!");
 			context.getUser().heal((int)context.getDamage());
 			context.setDamage(0);
 		}
@@ -95,7 +95,7 @@ class Swarm implements Ability{
 	@Override
 	public void applyEffect(String event, BattleContext context) { //check if the event is "damage calculation" and if the types of the move contain BUG and check if the user's HP is less than or equal to 33% of its max HP. if so, multiply the damage by 1.5
 		if ("damage calculation".equals(event) && context.getMove().getType().contains(Pokemon.PokemonType.BUG) && context.getUser().healthVal() <= context.getUser().getMaxHP() / 3) {
-			System.out.println("Swarm activated!");
+			System.out.println(context.getUser()+ "'s Swarm activated!");
 			context.setDamage(context.getDamage() * 1.5);
 		}
 	}
@@ -105,7 +105,7 @@ class MotorDrive implements Ability{
 	@Override
 	public void applyEffect(String event, BattleContext context) { //check if the event is "damage calculation" and if the types of the move contain ELECTRIC. if so, set the damage to 0 and multiply the user's speed by 1.5
 		if ("damage calculation".equals(event) && context.getMove().getType().contains(Pokemon.PokemonType.ELECTRIC)) {
-			System.out.println("Motor Drive activated!");
+			System.out.println(context.getUser()+ "'s Motor Drive activated!");
 			context.getUser().setSpeed((int)(context.getUser().getSpeed() * 1.5));
 			context.setDamage(0);
 		}
@@ -116,7 +116,7 @@ class Filter implements Ability{
 	@Override
 	public void applyEffect(String event, BattleContext context) { //check if the event is "damage calculation" and if the damage multiplier is greater than 1. if so, divide the damage by 2
 		if ("damage calculation".equals(event) && context.getMultiplier() > 1) {
-			System.out.println("Filter activated!");
+			System.out.println(context.getUser()+ "'s Filter activated!");
 			context.setDamage(context.getDamage() / 2);
 		}
 	}
@@ -126,7 +126,7 @@ class SolidRock implements Ability{
 	@Override
 	public void applyEffect(String event, BattleContext context) { //check if the event is "damage calculation" and if the damage multiplier is greater than 1. if so, divide the damage by 2
 		if ("damage calculation".equals(event) && context.getMultiplier() > 1) {
-			System.out.println("Solid Rock activated!");
+			System.out.println(context.getUser()+ "'s Solid Rock activated!");
 			context.setDamage(context.getDamage() / 2);
 		}
 	}
@@ -136,7 +136,7 @@ class Justified implements Ability{
 	@Override
 	public void applyEffect(String event, BattleContext context) { //check if the event is "damage calculation" and if the move type contains DARK. if so, multiply the user's attack by 1.5
 		if ("damage calculation".equals(event) && context.getMove().getType().contains(Pokemon.PokemonType.DARK)) {
-			System.out.println("Justified activated!");
+			System.out.println(context.getUser()+ "'s Justified activated!");
 			context.getUser().setAttack((int)(context.getUser().getAttack() * 1.5));
 		}
 	}
@@ -146,7 +146,7 @@ class Rattled implements Ability{
 	@Override
 	public void applyEffect(String event, BattleContext context) { //check if the event is "damage calculation" and if the move type contains DARK, GHOST, or BUG or if the user is intimidated. if so, multiply the user's speed by 1.5
 		if ("damage calculation".equals(event) && (context.getMove().getType().contains(Pokemon.PokemonType.DARK) || context.getMove().getType().contains(Pokemon.PokemonType.GHOST) || context.getMove().getType().contains(Pokemon.PokemonType.BUG) /*|| context.getUser().isIntimidated()*/)) {
-			System.out.println("Rattled activated!");
+			System.out.println(context.getUser()+ "'s Rattled activated!");
 			context.getUser().setSpeed((int)(context.getUser().getSpeed() * 1.5));
 		}
 	}
@@ -157,7 +157,7 @@ class PoisonHeal implements Ability{
 	@Override
 	public void applyEffect(String event, BattleContext context) { //check if the event is "damage calculation" or "status damage" and if the user is poisoned. if so, heal the user by 1/8 of its max HP
 		if (("damage calculation".equals(event) || "status damage".equals(event)) && context.getUser().getStatusCondition().isPoisoned()) {
-			System.out.println("Poison Heal activated!");
+			System.out.println(context.getUser()+ "'s Poison Heal activated!");
 			context.getUser().heal(context.getUser().getMaxHP() / 8);
 		}
 	}
@@ -167,7 +167,7 @@ class Heatproof implements Ability{
 	@Override
 	public void applyEffect(String event, BattleContext context) { //check if the event is "damage calculation" or "status damage" and if the move type contains FIRE. if so, divide the damage by 2
 		if (("damage calculation".equals(event) || "status damage".equals(event)) && context.getMove().getType().contains(Pokemon.PokemonType.FIRE)) {
-			System.out.println("Heatproof activated!");
+			System.out.println(context.getUser()+ "'s Heatproof activated!");
 			context.setDamage(context.getDamage() / 2);
 		}
 	}
@@ -178,7 +178,7 @@ class MagicGuard implements Ability{
 	@Override
 	public void applyEffect(String event, BattleContext context) { //check if the event is "status damage." if so, set the damage to 0 
 		if ("status damage".equals(event)) {
-			System.out.println("Magic Guard activated!");
+			System.out.println(context.getUser()+ "'s Magic Guard activated!");
 			context.setDamage(0);
 		}
 	}
@@ -189,7 +189,7 @@ class Defeatist implements Ability{
 	@Override
 	public void applyEffect(String event, BattleContext context) { //check if the event is "damage calculation" and if the user's HP is less than or equal to 50% of its max HP. if so, divide the user's attack and special attack by 2
 		if ("damage calculation".equals(event) && context.getUser().healthVal() <= context.getUser().getMaxHP() / 2) { 
-			System.out.println("Defeatist activated!"); 
+			System.out.println(context.getUser()+ "'s Defeatist activated!"); 
 			context.getUser().setAttack(context.getUser().getAttack() / 2); 
 			context.getUser().setSpAtk(context.getUser().getSpAtk() / 2);
 		}
@@ -204,7 +204,7 @@ class Rivalry implements Ability{ //Rivalry: "Becomes competitive and deals more
 				context.setDamage(context.getDamage() * 1.25);
 			}
 			else if (context.getUser().getGender() != context.getTarget().getGender()) {
-				System.out.println("Rivalry activated!");
+				System.out.println(context.getUser()+ "'s Rivalry activated!");
 				context.setDamage(context.getDamage() * 0.75);
 			}
 		}

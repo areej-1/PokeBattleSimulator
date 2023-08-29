@@ -22,16 +22,19 @@ public class tester {
 		Pokemon ga = new Pokemon("Garchomp", "Dragon/Ground", 55, "Mach", 196, 162, 128, 111, 106, 152, null, true, scanner);
 		Pokemon luc = new Pokemon("Lucario", "Fighting/Steel", 50, "Aura", 142, 133, 92, 127, 93, 108, null, false, scanner);
 		Pokemon st = new Pokemon("Staraptor", "Normal/Flying", 56, "Predator", 169, 154, 109, 81, 87, 147, intimidate, false, scanner);
-		Pokemon lux = new Pokemon("Luxray", "Electric", 56, "Gleam Eyes", 167, 152, 113, 133, 110, 110, intimidate, false, scanner);
+		Pokemon lux = new Pokemon("Luxray", "Electric", 56, "Gleam Eyes", 167, 152, 113, 133, 110, 160, intimidate, false, scanner);
 		Pokemon ma = new Pokemon("Piloswine", "Ice/Ground", 55, "Twin Tusk", 187, 141, 103, 95, 84, 104, null, false, scanner);
 		a.setParty(st, lux, ga, ma, luc);
+		a.swapPositions(n,lux);
 		a.setBag("Potion", "Potion", "Potion", "Super Potion", "Max Potion", "Max Potion", "Max Potion", "Revive"); //set bag
-		for (int i = 0; i <h.party().length; i++) {
+		/*for (int i = 0; i <h.party().length; i++) {
 			h.party()[i].setMoves(scanner); //set moves
 		}
 		for (int i = 0; i <a.party().length; i++) {
 			a.party()[i].setMoves(scanner); //set moves
-		}
+		}*/
+		a.party()[0].setMoves(scanner);
+		h.party()[0].setMoves(scanner);
 		Battle bte = new Battle(h, a); //constructor for battle is (trainer1, trainer2)
 		System.out.println(bte.battle(scanner)); //battle
 		scanner.close();

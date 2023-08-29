@@ -25,6 +25,12 @@ public class Move {
 	public String getName() {
 		return name;
 	}
+	public String failMessage(){ //returns a message to be printed if the move misses (overwritten in some subclasses)
+		return "The move missed!";
+	}
+	public String successMessage(){ //returns a message to be printed if the move hits (overwritten in some subclasses)
+		return "The move hit!";
+	}
 	@Override
 	public boolean equals(Object obj) {
 	    if (this == obj)
@@ -460,7 +466,14 @@ class Protect extends Move{
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
 		//Protect prevents any moves from hitting the user this turn. 
 		//Protect has an increased priority of +4, so it is used before all moves that do not have increased priority.
+		bc.getUser().setCanRecieveDamage(false);
 
+	}
+	public String failMessage() {
+		return "But it failed!";
+	}
+	public String successMessage(){
+		return "The Pokemon protected itself!";
 	}
 }
 class Fly extends Move{

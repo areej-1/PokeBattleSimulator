@@ -249,8 +249,19 @@ public class Battle {
 
 		}
 		System.out.println(curr.party()[p].getName() + " used " + targetMove.getName() + "!");
+		if (!other.party()[opP].getCanRecieveDamage()) {
+			System.out.println("But it failed!");
+			return;
+		}
 		targetMove.inflictStatus(curr.party()[p], other.party()[opP], bc); //apply the move's effect to the opponent pokemon
 		double damage = targetMove.damageToInflict(curr.party()[p], other.party()[opP]);
+		if (damage == -1.0){
+			System.out.println(targetMove.failMessage());
+			return;
+		}
+		else {
+			System.out.println(targetMove.successMessage());
+		}
 		bc.setDamage(damage); //set the damage in the battle context to the damage calculated
 		bc.setMove(targetMove); //set the move in the battle context to the move used
 		bc.setMultiplier(bc.getTarget().findMultiplier(targetMove)); //set the multiplier in the battle context to the multiplier calculated
@@ -346,6 +357,8 @@ public class Battle {
 			System.out.println("Trainer 1 current pokemon's turn number: "+ bc_trainer1.getTurnNumber());
 			System.out.println("Trainer 2 current pokemon's turn number: "+ bc_trainer2.getTurnNumber());
 			System.out.println("Turns passed:" + counterForTurns);
+			System.out.println("Trainer 1 current pokemon's can recieve damage: "+ trainer1.party()[currentP1].getCanRecieveDamage());
+			System.out.println("Trainer 2 current pokemon's can recieve damage: "+ trainer2.party()[currentP2].getCanRecieveDamage());
 			//apply effects from status conditions;
 			if (trainer1Turn) {
 				if (bc_trainer1.getUser().getStatusCondition() != null) {
@@ -398,10 +411,6 @@ public class Battle {
 	                currentP2 = switchPokemon(currentTrainer, currentP, scanner); 
 				}
 	        }
-	        if (!trainer1Turn){
-				bc_trainer1.getUser().endTurnReset();
-				bc_trainer2.getUser().endTurnReset();
-			}
 	        // Flip the trainer1Turn flag at the end of each turn
 	        trainer1Turn = !trainer1Turn;
 			counterForTurns++; //increment the counter for turns
@@ -409,7 +418,8 @@ public class Battle {
 	        if (trainer1.party()[currentP1].getSpeed() == trainer2.party()[currentP2].getSpeed()) {
 	            initiative = !initiative; // Flip the initiative when levels are the same
 	        }
-		
+			System.out.println("Trainer 1 current pokemon's can recieve damage: "+ trainer1.party()[currentP1].getCanRecieveDamage());
+			System.out.println("Trainer 2 current pokemon's can recieve damage: "+ trainer2.party()[currentP2].getCanRecieveDamage());
 			//check if the pokemon was swapped (if the turn number is 0), and if it was, then leave the number as is. otherwise, increment by 1 (since it is the next turn)
 			if (counterForTurns%2 == 0) {
 				if (!bc_trainer1.getWasSwapped()){
@@ -424,7 +434,14 @@ public class Battle {
 				bc_trainer2.setWasHit(false);
 				bc_trainer2.setWasSwapped(false);
 
+				bc_trainer1.getUser().endTurnReset();
+				bc_trainer2.getUser().endTurnReset();
+
 			}
+			System.out.println("Trainer 1 current pokemon's can recieve damage: "+ trainer1.party()[currentP1].getCanRecieveDamage());
+			System.out.println("Trainer 2 current pokemon's can recieve damage: "+ trainer2.party()[currentP2].getCanRecieveDamage());
+			
+
 
 	    } 
 		// Return the winner of the battle

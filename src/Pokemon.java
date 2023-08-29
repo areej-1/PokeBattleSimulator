@@ -58,6 +58,8 @@ public class Pokemon {
 	Set<PokemonType> weakness = new HashSet<PokemonType>(); //specific to each Pokemon, taken from the static HashMaps below
 	Set<PokemonType> resistance = new HashSet<PokemonType>();
 	Set<PokemonType> noEffect = new HashSet<PokemonType>();
+
+	private boolean canRecieveDamage = true; //used for moves like Protect and Detect
 	
 	static { //static initializer for typeWeaknesses, typeResistances, and typeNoEffects (all HashMaps)
 		addToMap(typeWeaknesses, PokemonType.NORMAL, PokemonType.FIGHTING);
@@ -509,6 +511,8 @@ public class Pokemon {
 		if (status == null || status.isParalyzed()){
 			canMove = true;
 		}
+		//reset canRecieveDamage to true
+		canRecieveDamage = true;
 	}
 	public void setItem(String i) { //sets the held item of the Pokemon
 		item = i;
@@ -577,6 +581,12 @@ public class Pokemon {
 				return 1;
 		}
 
+	}
+	public void setCanRecieveDamage(boolean b){ //sets whether or not the Pokemon can recieve damage
+		canRecieveDamage = b;
+	}
+	public boolean getCanRecieveDamage(){ //returns whether or not the Pokemon can recieve damage
+		return canRecieveDamage;
 	}
 }
 

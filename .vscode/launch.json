@@ -1,0 +1,24 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "tester",
+            "request": "launch",
+            "mainClass": "tester",
+            "projectName": "fsa"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-tester",
+            "request": "launch",
+            "mainClass": "tester",
+            "projectName": "PokeBattleSimulator",
+            "classPaths": [
+                "${workspaceFolder}/bin",
+                "${workspaceFolder}/libs/jsoup-1.16.1.jar",
+                "${workspaceFolder}/libs/selenium-java-4.9.0/selenium-api-4.9.0-sources.jar"
+            ]
+        }
+    ]
+}

@@ -1,8 +1,6 @@
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import org.checkerframework.checker.units.qual.s;
-
 public class Move {
 	private ArrayList<Pokemon.PokemonType> type = new ArrayList<Pokemon.PokemonType>();
 	private String name;

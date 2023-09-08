@@ -1,3 +1,6 @@
 {
-    "java.compile.nullAnalysis.mode": "automatic"
+  "java.project.referencedLibraries": [
+    "libs/jsoup-1.16.1.jar",
+    "libs/selenium-java-4.9.0/selenium-api-4.9.0-sources.jar"
+  ]
 }

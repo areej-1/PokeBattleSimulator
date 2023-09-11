@@ -1,10 +1,7 @@
-//import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Scanner;
 import java.text.NumberFormat;
-//import java.util.Locale;
 
 public class Trainer {
 	private Pokemon[] party = new Pokemon[6];

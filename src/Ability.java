@@ -52,7 +52,7 @@ class ThickFat implements Ability{
 class Adaptability implements Ability{
 	@Override
 	public void applyEffect(String event, BattleContext context) { //check if the event is "damage calculation" and if the types of the move contain the same type as the user. if so, multiply the damage by 2
-		if ("damage calculation".equals(event) && context.getMove().getType().contains(context.getUser().getType())) {
+		if ("damage calculation".equals(event) && context.getMove().checkType(context.getUser())) {
 			System.out.println(context.getUser()+ "'s Adaptability activated!");
 			context.setDamage(context.getDamage() * 2);
 		}

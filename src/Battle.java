@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 public class Battle {
@@ -342,6 +341,12 @@ public class Battle {
 	        Trainer otherTrainer = trainer1Turn ? trainer2 : trainer1;
 	        currentP = trainer1Turn ? currentP1 : currentP2;
 	        int otherP = trainer1Turn ? currentP2 : currentP1;
+			//check if the current trainers current pokemon is skipping a turn; if so, skip
+			if (currentTrainer.party()[currentP].getSkipTurn() == true){
+				currentTrainer.party()[currentP].setSkipTurn(false);
+				trainer1Turn = !trainer1Turn;
+				continue;
+			}
 			//check which trainer's turn it is, then check if the turnNumber = 0, then use the applyEffect method with the parameters "stats modification" and the battle context (bc)
 			if (currentTrainer.party()[currentP].getAbility() != null){
 				if (trainer1Turn) {

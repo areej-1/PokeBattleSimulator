@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
-import java.lang.reflect.*;
 public class Pokemon {
 	public enum PokemonType { // 18 types (represented by enum constants)
 	    NORMAL,
@@ -60,6 +59,8 @@ public class Pokemon {
 	Set<PokemonType> noEffect = new HashSet<PokemonType>();
 
 	private boolean canRecieveDamage = true; //used for moves like Protect and Detect
+
+	private boolean skipTurn = false; //used for moves like Fly, which skip a turn
 	
 	static { //static initializer for typeWeaknesses, typeResistances, and typeNoEffects (all HashMaps)
 		addToMap(typeWeaknesses, PokemonType.NORMAL, PokemonType.FIGHTING);
@@ -588,6 +589,14 @@ public class Pokemon {
 	public boolean getCanRecieveDamage(){ //returns whether or not the Pokemon can recieve damage
 		return canRecieveDamage;
 	}
+
+	public void setSkipTurn(boolean b){ //sets whether or not the Pokemon will skip a turn
+		skipTurn = b;
+	}
+	public boolean getSkipTurn(){ //returns whether or not the Pokemon will skip a turn
+		return skipTurn;
+	}
+
 }
 
 class PartnerPokemon extends Pokemon{ //this class is for the Pokemon that the player has as a partner

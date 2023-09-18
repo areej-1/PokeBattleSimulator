@@ -491,6 +491,7 @@ class Protect extends Move{
 	}
 }
 class Fly extends Move{
+	private Pokemon userPokemon = null;
 	public Fly(){
 		super("Fly", 90, 95, true, false, Pokemon.PokemonType.FLYING);
 	}
@@ -499,8 +500,14 @@ class Fly extends Move{
 		//Fly skips the next turn, becoming a two-turn move, and hits on the second turn.
 		userPokemon.setSkipTurn(true);
 		userPokemon.setCanRecieveDamage(false);
-		
+		this.userPokemon = userPokemon;
 	}
+
+	//overwrite the successMessage method to print a different message (pokemon name flew up high!)
+	public String successMessage(){
+		return userPokemon.getName() + " flew up high!";
+	}
+
 
 
 }
@@ -540,5 +547,44 @@ class FlameWheel extends Move{
 		if (userPokemon.getStatusCondition() != null && userPokemon.getStatusCondition().isFrozen()) {
 			userPokemon.getStatusCondition().setFrozen(false);
 		}
+	}
+}
+
+class ThunderWave extends Move{
+	public ThunderWave(){
+		super("Thunder Wave", 0, 100, true, false, Pokemon.PokemonType.ELECTRIC);
+	}
+}
+
+class Spark extends Move{
+	public Spark(){
+		super("Spark", 65, 100, true, false, Pokemon.PokemonType.ELECTRIC);
+	}
+}
+
+class DragonBreath extends Move{
+	public DragonBreath(){
+		super("Dragon Breath", 60, 100, true, false, Pokemon.PokemonType.DRAGON);
+	}
+}
+class TakeDown extends Move{
+	public TakeDown(){
+		super("Take Down", 90, 85, true, false, Pokemon.PokemonType.NORMAL);
+	}
+}
+class IcyWind extends Move{
+	public IcyWind(){
+		super("Icy Wind", 55, 95, true, false, Pokemon.PokemonType.ICE);
+	}
+}
+class DrainPunch extends Move{
+	public DrainPunch(){
+		super("Drain Punch", 75, 100, true, false, Pokemon.PokemonType.FIGHTING);
+	}
+}
+
+class MeteorMash extends Move{
+	public MeteorMash(){
+		super("Meteor Mash", 90, 90, true, false, Pokemon.PokemonType.STEEL);
 	}
 }

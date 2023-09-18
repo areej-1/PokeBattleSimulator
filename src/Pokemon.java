@@ -351,6 +351,7 @@ public class Pokemon {
 	        health -= damage;
 	    }
 	}
+
 	//another doDamage method, but takes a number of damage instead (used for status effects)
 	public void doDamage(int damage) {
 		if (health - damage < 0) {

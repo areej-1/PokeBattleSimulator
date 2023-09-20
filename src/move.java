@@ -554,11 +554,26 @@ class ThunderWave extends Move{
 	public ThunderWave(){
 		super("Thunder Wave", 0, 100, true, false, Pokemon.PokemonType.ELECTRIC);
 	}
+
+	//overwrite the inflictStatus method to inflict the status effect of thunder wave
+	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
+		//Thunder Wave paralyzes the target, as long as it is not a Ground-type Pokémon.
+		if (!targetPokemon.getType().contains(Pokemon.PokemonType.GROUND)) {
+			StatusCondition.paralyzed(targetPokemon);
+		}
+	}
 }
 
 class Spark extends Move{
 	public Spark(){
 		super("Spark", 65, 100, true, false, Pokemon.PokemonType.ELECTRIC);
+	}
+	//overwrite the inflictStatus method to inflict the status effect of spark
+	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
+		//30% chance of paralyzing the opponent, as long as the opponent is not a electric type <-- double check that it actually checks the opponent's type
+		if (Math.random() < 0.3 && !targetPokemon.getType().contains(Pokemon.PokemonType.ELECTRIC)) {
+			StatusCondition.paralyzed(targetPokemon);
+		}
 	}
 }
 
@@ -566,25 +581,70 @@ class DragonBreath extends Move{
 	public DragonBreath(){
 		super("Dragon Breath", 60, 100, true, false, Pokemon.PokemonType.DRAGON);
 	}
+	//overwrite the inflictStatus method to inflict the status effect of dragon breath
+	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
+		//30% chance of paralyzing the opponent
+		if (Math.random() < 0.3) {
+			StatusCondition.paralyzed(targetPokemon);
+		}
+	}
 }
 class TakeDown extends Move{
 	public TakeDown(){
 		super("Take Down", 90, 85, true, false, Pokemon.PokemonType.NORMAL);
+	}
+
+	//overwrite the inflictStatus method to inflict the status effect of take down
+	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
+		//Take Down inflicts damage, and the user receives recoil damage equal to ¼ of the damage done to the target.
+		userPokemon.doDamage(getDamage() / 4);
+
+		/**If the user of Take Down attacks first and faints due to recoil damage, the opponent will not attack or be subjected to recurrent damage during that round.
+		Self-inflicted recoil damage from Take Down from the previous turn can be countered if the opponent does not make a move on the following turn.**/
+		//wip for the above
 	}
 }
 class IcyWind extends Move{
 	public IcyWind(){
 		super("Icy Wind", 55, 95, true, false, Pokemon.PokemonType.ICE);
 	}
+	//overwrite the inflictStatus method to inflict the status effect of icy wind
+	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
+		//Icy Wind inflicts damage and there's a 99.6% chance that it lowers the target's Speed stat by one stage.
+		if (Math.random() < 0.996) {
+			targetPokemon.setSpeed(targetPokemon.getSpeed() - 1);
+		}
+	}
 }
 class DrainPunch extends Move{
 	public DrainPunch(){
 		super("Drain Punch", 75, 100, true, false, Pokemon.PokemonType.FIGHTING);
+	}
+
+	//overwrite the inflictStatus method to inflict the status effect of drain punch
+
+	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
+		//Drain Punch inflicts damage, and the user recovers ½ of the HP drained. note that if damage dealt is 1, the user will recover 1 HP, not 0.5 HP.
+		if (getDamage()==1){
+			userPokemon.heal(1);
+		}
+		else{
+			userPokemon.heal(getDamage() / 2);
+		}
 	}
 }
 
 class MeteorMash extends Move{
 	public MeteorMash(){
 		super("Meteor Mash", 90, 90, true, false, Pokemon.PokemonType.STEEL);
+	}
+
+	//overwrite the inflictStatus method to inflict the status effect of meteor mash
+
+	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
+		//Meteor Mash inflicts damage and has a 20% chance of raising the user's Attack stat by one stage.
+		if (Math.random() < 0.2) {
+			userPokemon.setAttack(userPokemon.getAttack() + 1);
+		}
 	}
 }

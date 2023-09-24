@@ -9,6 +9,7 @@ public class Move {
 	private int baseAccuracy;
 	private boolean usesAccuracy = true;
 	private boolean isTwoTurn = false;
+	private int priority = 0; //default priority is 0
 	public Move(String n, int damage, int baseAccuracy, boolean usesAccuracy, boolean isTwoTurn, Pokemon.PokemonType ... t) {
 		for (Pokemon.PokemonType type : t) {
 			this.type.add(type);
@@ -125,6 +126,12 @@ public class Move {
 	}
 	public boolean isTwoTurn() {
 		return isTwoTurn;
+	}
+	public int getPriority() {
+		return priority;
+	}
+	public void setPriority(int priority) {
+		this.priority = priority;
 	}
 
 
@@ -273,8 +280,6 @@ class AuraSphere extends Move{
 	}
 	//overwrite the inflictStatus method to inflict the status effect of aura sphere
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
-		//Aura Sphere inflicts damage and bypasses accuracy checks to always hit, unless the target is in the semi-invulnerable turn of a move such as Dig or Fly.
-		//wip
 	}
 }
 

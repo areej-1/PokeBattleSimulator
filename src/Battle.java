@@ -7,6 +7,7 @@ public class Battle {
 	private static BattleContext bc_trainer2;
 	private static Trainer currentTrainer;
 	private int currentP;
+	private int otherP;
 	private static int currentP1;
 	private static int currentP2;
 	private static boolean trainer1Turn;
@@ -223,7 +224,8 @@ public class Battle {
 		
 	}
 
-	private void attack(int p, Trainer curr, int opP, Trainer other, Scanner scanner) { //attack method. takes in the current pokemon, current trainer, opponent pokemon, opponent trainer, and scanner, and attacks the opponent pokemon
+	//helper method to choose a move. takes in the current pokemon, current trainer, opponent pokemon, opponent trainer, and scanner, and helps the user choose a move for the current pokemon to use
+	private Move chooseMove(int p, Trainer curr, int opP, Trainer other, Scanner scanner){
 		Move targetMove;
 		//if curr == trainer1, then bc = bc_trainer1, else bc = bc_trainer2
 		BattleContext bc = (curr == trainer1) ? bc_trainer1 : bc_trainer2;
@@ -249,26 +251,40 @@ public class Battle {
 	        }
 
 		}
-		System.out.println(curr.party()[p].getName() + " used " + targetMove.getName() + "!");
-		if (!other.party()[opP].getCanRecieveDamage()) {
-			System.out.println("But it failed!");
-			return;
+		return targetMove;
+	}
+
+	private void attack(Move targetMove1, Move targetMove2) { //attack method. 
+		//compare the priorities of the moves (targetMove1, targetMove2), then use useMove accordingly
+		if (targetMove1.getPriority() > targetMove2.getPriority()){
+			useMove(trainer1, trainer2, targetMove1, bc_trainer1);
+			//then use the other move
+			useMove(trainer2, trainer1, targetMove2, bc_trainer2);
 		}
-		bc.setMove(targetMove); //set the move in the battle context to the move useds
-		targetMove.inflictStatus(curr.party()[p], other.party()[opP], bc); //apply the move's effect to the opponent pokemon
+		else if (targetMove1.getPriority() < targetMove2.getPriority()){
+			useMove(trainer2, trainer1, targetMove2, bc_trainer1);
+			//then use the other move
+			useMove(trainer1, trainer2, targetMove1, bc_trainer2);
+		}
+		
+	}
+	private void useMove(Trainer curr, Trainer other, Move targetMove, BattleContext bc){
+		System.out.println(curr.party()[currentP].getName() + " used " + targetMove.getName());
+
+		targetMove.inflictStatus(curr.party()[currentP], other.party()[otherP], bc); //apply the move's effect to the opponent pokemon
 		
 		//check if current pokemon is skipping turn.
-		if (curr.party()[p].getSkipTurn() == true){
+		if (curr.party()[currentP].getSkipTurn() == true){
 			targetMove.successMessage(); //print the success message of the move (ie. "pokemon-name flew up high! (fly)")
 			//check if the current trainer is trainer1 or trainer2, then set the turnSkipMoveDamage accordingly, based on values returned by damageToInflict method
 			if (curr == trainer1){
-				turnSkipMoveDamage_trainer1 = targetMove.damageToInflict(curr.party()[p], other.party()[opP]);
+				turnSkipMoveDamage_trainer1 = targetMove.damageToInflict(curr.party()[currentP], other.party()[otherP]);
 			} else {
-				turnSkipMoveDamage_trainer2 = targetMove.damageToInflict(curr.party()[p], other.party()[opP]);
+				turnSkipMoveDamage_trainer2 = targetMove.damageToInflict(curr.party()[currentP], other.party()[otherP]);
 			}
 			return;
 		}
-		double damage = targetMove.damageToInflict(curr.party()[p], other.party()[opP]);
+		double damage = targetMove.damageToInflict(curr.party()[currentP], other.party()[otherP]);
 		if (damage == -1.0){
 			System.out.println(targetMove.failMessage());
 			return;
@@ -276,13 +292,12 @@ public class Battle {
 		else {
 			System.out.println(targetMove.successMessage());
 		}
-		bc.setDamage(damage); //set the damage in the battle context to the damage calculated		bc.setMultiplier(bc.getTarget().findMultiplier(targetMove)); //set the multiplier in the battle context to the multiplier calculated
 		//check if the current pokemon has a ability (not null), then use the applyEffect method with the parameters "damage calculation" and the battle context (bc)
-		if (curr.party()[p].getAbility() != null) {
-			curr.party()[p].getAbility().applyEffect("damage calculation", bc);
+		if (curr.party()[currentP].getAbility() != null) {
+			curr.party()[currentP].getAbility().applyEffect("damage calculation", bc);
 		}
 		if (targetMove.getDamage()!=0){
-			other.party()[opP].doDamage(bc.getDamage(), targetMove);
+			other.party()[otherP].doDamage(damage, targetMove); //doDamage takes in the damage and the move used, and applies the damage to the opposing pokemon
 		}
 		//set wasHit of the opposing trainer's battle context to true
 		if (curr == trainer1) {
@@ -349,11 +364,13 @@ public class Battle {
 		bc_trainer2.setTurnNumber(0);
 	    boolean initiative = trainer1.party()[currentP1].getSpeed() > trainer2.party()[currentP2].getSpeed(); //
 	    trainer1Turn = trainer1.party()[currentP1].getSpeed() == trainer2.party()[currentP2].getSpeed() ? initiative : trainer1.party()[currentP1].getSpeed() > trainer2.party()[currentP2].getSpeed();
-	    while (!trainer1.partyFainted() && !trainer2.partyFainted()) {
+	    Move trainer1_currMove = null;
+		Move trainer2_currMove = null;
+		while (!trainer1.partyFainted() && !trainer2.partyFainted()) {
 	        currentTrainer = trainer1Turn ? trainer1 : trainer2;
 	        Trainer otherTrainer = trainer1Turn ? trainer2 : trainer1;
 	        currentP = trainer1Turn ? currentP1 : currentP2;
-	        int otherP = trainer1Turn ? currentP2 : currentP1;
+			otherP = trainer1Turn ? currentP2 : currentP1;
 			//check if the current trainers current pokemon is skipping a turn; if so, skip
 			if (currentTrainer.party()[currentP].getSkipTurn() == true){
 				currentTrainer.party()[currentP].setSkipTurn(false);
@@ -372,16 +389,7 @@ public class Battle {
 	        		}
 	     		}
 			}
-			/*System.out.println("Trainer 1 current pokemon's turn number: "+ bc_trainer1.getTurnNumber());
-			System.out.println("Trainer 2 current pokemon's turn number: "+ bc_trainer2.getTurnNumber());
-			System.out.println("Turns passed:" + counterForTurns);
-			System.out.println("Trainer 1 current pokemon's can recieve damage: "+ trainer1.party()[currentP1].getCanRecieveDamage());
-			System.out.println("Trainer 2 current pokemon's can recieve damage: "+ trainer2.party()[currentP2].getCanRecieveDamage());*/
-
-			//print the values of turnSkipMoveDamage_trainer1 and turnSkipMoveDamage_trainer2
-			//System.out.println("turnSkipMoveDamage_trainer1: " + turnSkipMoveDamage_trainer1);
-			//System.out.println("turnSkipMoveDamage_trainer2: " + turnSkipMoveDamage_trainer2);
-			//apply effects from status conditions;
+			
 
 			//check which trainer it is, then check if the respective turnskipmovedamage is not 0, then apply the damage to the opposing pokemon
 			if (trainer1Turn) {
@@ -416,9 +424,13 @@ public class Battle {
 	        if (input.equals("attack")) {
 				//check if the current pokemon is able to move (i.e. if the current pokemon is not paralyzed, didn't flinch, etc.), then call the attack method with the parameters current pokemon, current trainer, other pokemon, other trainer, and scanner
 				if (currentTrainer.party()[currentP].getCanMove()){
-					System.out.println(currentTrainer.party()[currentP].getType()); 
-					attack(currentP, currentTrainer, otherP, otherTrainer, scanner);
-					System.out.println(currentTrainer.party()[currentP].getType());
+					if(trainer1Turn) {
+						//set value of trainer1_currMove to the move used by the current pokemon
+						trainer1_currMove = currentTrainer.party()[currentP1].moves()[0];
+					} else {
+						//set value of trainer2_currMove to the move used by the current pokemon
+						trainer2_currMove = currentTrainer.party()[currentP2].moves()[0];
+					}
 					if (otherTrainer.partyFainted()) {
 						System.out.println(otherTrainer.party()[otherP].getName() + " has fainted");
 						break;
@@ -459,10 +471,13 @@ public class Battle {
 	        if (trainer1.party()[currentP1].getSpeed() == trainer2.party()[currentP2].getSpeed()) {
 	            initiative = !initiative; // Flip the initiative when levels are the same
 	        }
+
 			//System.out.println("Trainer 1 current pokemon's can recieve damage: "+ trainer1.party()[currentP1].getCanRecieveDamage());
 			//System.out.println("Trainer 2 current pokemon's can recieve damage: "+ trainer2.party()[currentP2].getCanRecieveDamage());
 			//check if the pokemon was swapped (if the turn number is 0), and if it was, then leave the number as is. otherwise, increment by 1 (since it is the next turn)
 			if (counterForTurns%2 == 0) {
+				attack(trainer1_currMove, trainer2_currMove);
+
 				if (!bc_trainer1.getWasSwapped()){
 					bc_trainer1.incrementTurnNumber();
 				}
@@ -474,6 +489,9 @@ public class Battle {
 				bc_trainer1.setWasSwapped(false);
 				bc_trainer2.setWasHit(false);
 				bc_trainer2.setWasSwapped(false);
+				//reset the trainer1_currMove and trainer2_currMove to null
+				trainer1_currMove = null;
+				trainer2_currMove = null;
 
 				//make sure that either pokemon is not skipping a turn. if they're not skipping, then use the endTurnReset method to reset the pokemon's stats
 				if (!trainer1.party()[currentP1].getSkipTurn()){

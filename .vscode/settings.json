@@ -9,5 +9,7 @@
       "path": "/Library/Java/JavaVirtualMachines/jdk-20.jdk/Contents/Home",
       "default": true
     }
-  ]
+  ],
+  "java.jdt.ls.java.home": "/Library/Java/JavaVirtualMachines/jdk-20.jdk/Contents/Home"
+
 }

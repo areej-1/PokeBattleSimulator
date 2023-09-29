@@ -140,7 +140,7 @@ public class Trainer {
 	public Pokemon[] party() {
 		return party;
 	}
-	public boolean partyFainted() {
+	public boolean partyFainted() { // Returns true if all Pokemon in the party are fainted.
 		int i = 0;
 		for (Pokemon p : party) {
 			if (p.healthVal() == 0) {

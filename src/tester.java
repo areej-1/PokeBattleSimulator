@@ -26,6 +26,7 @@ public class tester {
 		Pokemon lux = new Pokemon("Luxray", "Electric", 56, "Gleam Eyes", 167, 152, 113, 133, 110, 160, intimidate, false, scanner);
 		Pokemon ma = new Pokemon("Piloswine", "Ice/Ground", 55, "Twin Tusk", 187, 141, 103, 95, 84, 104, null, false, scanner);
 		a.setParty(st, lux, ga, ma, luc);
+		a.swapPositions(n, lux); 
 		a.setBag("Potion", "Potion", "Potion", "Super Potion", "Max Potion", "Max Potion", "Max Potion", "Revive"); //set bag
 		/*for (int i = 0; i <h.party().length; i++) {
 			h.party()[i].setMoves(scanner); //set moves

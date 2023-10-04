@@ -8,6 +8,8 @@ public class BattleContext {
     private Battle currentBattle;
     private boolean wasHit = false; //boolean variable that stores whether or not the user pokemon was hit by a move in the current turn. false by default.
     private boolean wasSwapped = false; //boolean variable that stores whether or not the user pokemon was swapped out in the current turn. false by default.
+    //variable for consecutive turns protect (used in the move class for the protect move)
+    private int consecutiveTurnsProtect = 0;
     //constructors for all possible combinations of parameters (doesn't have to be all of the parameters; can be less than five)
     public BattleContext(Pokemon user, Pokemon target, Move move, double damage) {
         this.user = user;
@@ -286,6 +288,10 @@ public class BattleContext {
         return move;
     }
     public void setMove(Move move) {
+        //check if the move is not protect 
+        if (!move.getName().equals("Protect")) {
+            consecutiveTurnsProtect = 0;
+        }
         this.move = move;
     }
     public double getDamage() {
@@ -309,7 +315,7 @@ public class BattleContext {
     public void setMultiplier(double multiplier) {
         this.multiplier = multiplier;
     }
-    public Battle getCurrentBattle() {
+    public Battle getCurrentBattle() { //returns the current battle ()
         return currentBattle;
     }
     public void setCurrentBattle(Battle currentBattle) {
@@ -326,6 +332,12 @@ public class BattleContext {
     }
     public void setWasSwapped(boolean wasSwapped) {
         this.wasSwapped = wasSwapped;
+    }
+    public int getConsecutiveProtect() {
+        return consecutiveTurnsProtect;
+    }
+    public void setConsecutiveProtect(int consecutiveTurnsProtect) {
+        this.consecutiveTurnsProtect = consecutiveTurnsProtect;
     }
 
 }

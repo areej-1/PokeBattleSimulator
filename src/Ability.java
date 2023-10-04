@@ -143,9 +143,10 @@ class Justified implements Ability{
 }
 //Rattled: "The Pokémon gets scared when hit by a Dark-, Ghost-, or Bug-type move or if intimidated, which boosts its Speed stat."
 class Rattled implements Ability{
+	//Note that to check if a Pokemon is intimidated, first grab its status condition, then run the isIntimidated() method on it (e.g. context.getUser().getStatusCondition().isIntimidated())
 	@Override
 	public void applyEffect(String event, BattleContext context) { //check if the event is "damage calculation" and if the move type contains DARK, GHOST, or BUG or if the user is intimidated. if so, multiply the user's speed by 1.5
-		if ("damage calculation".equals(event) && (context.getMove().getType().contains(Pokemon.PokemonType.DARK) || context.getMove().getType().contains(Pokemon.PokemonType.GHOST) || context.getMove().getType().contains(Pokemon.PokemonType.BUG) /*|| context.getUser().isIntimidated()*/)) {
+		if ("damage calculation".equals(event) && (context.getMove().getType().contains(Pokemon.PokemonType.DARK) || context.getMove().getType().contains(Pokemon.PokemonType.GHOST) || context.getMove().getType().contains(Pokemon.PokemonType.BUG) /*|| context.getUser().getStatusCondition().isIntimidated()*/)) {
 			System.out.println(context.getUser()+ "'s Rattled activated!");
 			context.getUser().setSpeed((int)(context.getUser().getSpeed() * 1.5));
 		}
@@ -210,3 +211,57 @@ class Rivalry implements Ability{ //Rivalry: "Becomes competitive and deals more
 		}
 	}
 }
+
+/*class InnerFocus implements Ability{ //Inner Focus: "The Pokémon is protected from flinching."
+	@Override
+	public void applyEffect(String event, BattleContext context){
+		if ("flinch".equals(event)) {
+			System.out.println(context.getUser()+ "'s Inner Focus activated!");
+			context.setFlinch(false);
+		}
+	}
+}
+class SandViel implements Ability{ //Sand Veil: "Boosts the Pokémon's evasion in a sandstorm."
+	@Override
+	public void applyEffect(String event, BattleContext context){
+		if ("evasion".equals(event) && context.getWeather().equals("Sandstorm")) {
+			System.out.println(context.getUser()+ "'s Sand Veil activated!");
+			context.setEvasion(context.getEvasion() * 1.25);
+		}
+	}
+}
+
+		
+class Oblivious implements Ability{ //Oblivious: "The Pokémon is oblivious, and that keeps it from being infatuated or falling for taunts."
+	@Override
+	public void applyEffect(String event, BattleContext context){
+		if ("infatuation".equals(event) || "taunt".equals(event)) {
+			System.out.println(context.getUser()+ "'s Oblivious activated!");
+			context.setInfatuation(false);
+			context.setTaunt(false);
+		}
+	}
+}
+
+class SnowCloak implements Ability{ //Snow Cloak: "Raises evasion in a hailstorm."
+	@Override
+	public void applyEffect(String event, BattleContext context){
+		if ("evasion".equals(event) && context.getWeather().equals("Hail")) {
+			System.out.println(context.getUser()+ "'s Snow Cloak activated!");
+			context.setEvasion(context.getEvasion() * 1.25);
+		}
+	}
+}
+
+class Steadfast implements Ability{ //Steadfast: "Raises Speed each time the Pokémon flinches."
+	@Override
+	public void applyEffect(String event, BattleContext context){
+		if ("flinch".equals(event)) {
+			System.out.println(context.getUser()+ "'s Steadfast activated!");
+			context.getUser().setSpeed(context.getUser().getSpeed() * 1.5);
+		}
+	}
+}*/
+
+
+

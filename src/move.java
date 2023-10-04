@@ -82,7 +82,13 @@ public class Move {
 		double stagemultiplier = Pokemon.getValue(userPokemon.getAccuracyStage()-targetPokemon.getEvasionStage());
 		return baseAccuracy*stagemultiplier;
 	}
-	public double damageToInflict(Pokemon userPokemon, Pokemon targetPokemon) { //returns a -1.0 if the move misses, to be handled in the battle class
+	public double damageToInflict(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) { //returns a -1.0 if the move misses, to be handled in the battle class
+		//first check if targetPokemon can receive damage
+		if (!targetPokemon.getCanRecieveDamage()) {
+			System.out.println("But it failed!");
+			return -1.0;
+		}
+		
 		int level = userPokemon.getLevel();
 		int attack = userPokemon.getAttack();
 		int defense = targetPokemon.getDefense();
@@ -102,6 +108,14 @@ public class Move {
 		if (usesAccuracy) {
 			if (Math.random() > accuracy(userPokemon, targetPokemon)) {
 				System.out.println("The move missed!");
+				return -1.0;
+			}
+		}
+		//special case for protect
+		if (this.getName().equals("Protect")) {
+			double accuracy = Math.pow(2/3, bc.getConsecutiveProtect()-1);
+			if (Math.random() > (accuracy)) { 
+				System.out.println("The move failed!");
 				return -1.0;
 			}
 		}
@@ -265,12 +279,12 @@ class StoneEdge extends Move{
 class IceShard extends Move{
 	public IceShard(){
 		super("Ice Shard", 40, 100, true, false, Pokemon.PokemonType.ICE);
+		//set priority to +1
+		setPriority(1);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of ice shard
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon,BattleContext bc) {
-		//ice shard has a priority of +1, so is used before all moves that do not have increased priority.
-		//to be implemented. wip
-
+		//do nothing, since ice shard does not inflict a status effect
 	}
 }
 
@@ -428,10 +442,12 @@ class Waterfall extends Move{
 class Avalanche extends Move{
 	public Avalanche(){
 		super("Avalanche", 60, 100, true, false, Pokemon.PokemonType.ICE);
+		//set priority to -4
+		setPriority(-4);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of avalanche
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon,BattleContext bc) {
-		//Avalanche inflicts damage, and has a base power of 120 if the user was hit by the target in the same turn. its also a decreased priority move (priority -4)
+		//Avalanche inflicts damage, and has a base power of 120 if the user was hit by the target in the same turn. 
 		if (bc.getWasHit()){
 			setDamage(120);
 		}
@@ -469,23 +485,32 @@ class Roost extends Move{
 class ExtremeSpeed extends Move{
 	public ExtremeSpeed(){
 		super("Extreme Speed", 80, 100, true, false, Pokemon.PokemonType.NORMAL);
+		//set priority to +2
+		setPriority(2);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of extreme speed
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
 		//Extreme Speed inflicts damage and has no secondary effect. 
-		//it does have priority +2 though, so that's something. to be implemented
 	}
 }
 
 class Protect extends Move{
 	public Protect(){
 		super("Protect", 0, 0, false, false, Pokemon.PokemonType.NORMAL);
+		//set priority to +4
+		setPriority(4);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of protect
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
 		//Protect prevents any moves from hitting the user this turn. 
-		//Protect has an increased priority of +4, so it is used before all moves that do not have increased priority.
 		bc.getUser().setCanRecieveDamage(false);
+		//Protect decreases in accuracy each time it is used consecutively.
+		if (bc.getConsecutiveProtect() == 0) {
+			bc.setConsecutiveProtect(1);
+		}
+		else {
+			bc.setConsecutiveProtect(bc.getConsecutiveProtect() * 2);
+		}
 
 	}
 	public String failMessage() {

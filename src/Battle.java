@@ -312,13 +312,13 @@ public class Battle {
 			System.out.println(targetMove.successMessage()); //print the success message of the move (ie. "pokemon-name flew up high! (fly)")
 			//check if the current trainer is trainer1 or trainer2, then set the turnSkipMoveDamage accordingly, based on values returned by damageToInflict method
 			if (curr == trainer1){
-				turnSkipMoveDamage_trainer1 = targetMove.damageToInflict(curr.party()[currentP], other.party()[otherP]);
+				turnSkipMoveDamage_trainer1 = targetMove.damageToInflict(curr.party()[currentP], other.party()[otherP], bc);
 			} else {
-				turnSkipMoveDamage_trainer2 = targetMove.damageToInflict(curr.party()[currentP], other.party()[otherP]);
+				turnSkipMoveDamage_trainer2 = targetMove.damageToInflict(curr.party()[currentP], other.party()[otherP], bc);
 			}
 			return;
 		}
-		double damage = targetMove.damageToInflict(curr.party()[currentP], other.party()[otherP]);
+		double damage = targetMove.damageToInflict(curr.party()[currentP], other.party()[otherP], bc);
 		if (damage == -1.0){
 			System.out.println(targetMove.failMessage());
 			return;

@@ -85,7 +85,6 @@ public class Move {
 	public double damageToInflict(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) { //returns a -1.0 if the move misses, to be handled in the battle class
 		//first check if targetPokemon can receive damage
 		if (!targetPokemon.getCanRecieveDamage()) {
-			System.out.println("But it failed!");
 			return -1.0;
 		}
 		
@@ -113,10 +112,13 @@ public class Move {
 		}
 		//special case for protect
 		if (this.getName().equals("Protect")) {
-			double accuracy = Math.pow(2/3, bc.getConsecutiveProtect()-1);
-			if (Math.random() > (accuracy)) { 
-				System.out.println("The move failed!");
-				return -1.0;
+			//only applies if this is not the first time the user used protect - protect decreases in accuracy each time it is used consecutively.
+			if (bc.getConsecutiveProtect() > 0){
+				double accuracy = Math.pow(2/3, bc.getConsecutiveProtect()-1);
+				if (Math.random() > (accuracy)) { 
+					System.out.println("The move failed!");
+					return -1.0;
+				}
 			}
 		}
 		if (critical == 1.5) {

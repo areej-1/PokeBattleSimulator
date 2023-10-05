@@ -254,36 +254,73 @@ public class Battle {
 
 	private void attack(Move targetMove1, Move targetMove2) { //attack method. 
 		//compare the priorities of the moves (targetMove1, targetMove2), then use useMove accordingly
+		//first, print each move (debugging purposes)
+		System.out.println(targetMove1.getName());
+		System.out.println(targetMove2.getName());
+		//print the priority of each move (debugging purposes)
+		System.out.println(targetMove1.getPriority());
+		System.out.println(targetMove2.getPriority());
+		//determine which trainer has each move (targetMove1, targetMove2)
+
+		
 		if (targetMove1.getPriority() > targetMove2.getPriority()){
 			useMove(trainer1, trainer2, targetMove1, bc_trainer1);
 			//then use the other move
 			useMove(trainer2, trainer1, targetMove2, bc_trainer2);
 		}
 		else if (targetMove1.getPriority() < targetMove2.getPriority()){
-			useMove(trainer2, trainer1, targetMove2, bc_trainer1);
+			useMove(trainer2, trainer1, targetMove2, bc_trainer2);
 			//then use the other move
-			useMove(trainer1, trainer2, targetMove1, bc_trainer2);
+			useMove(trainer1, trainer2, targetMove1, bc_trainer1);
 		}
+
 		
 	}
+	private int faintedHandler(Trainer otherTrainer, int otherP, Scanner scanner){
+		if (otherTrainer.partyFainted()) {
+			System.out.println(otherTrainer.party()[otherP].getName() + " has fainted");
+			return -1;
+		} else if (otherTrainer.party()[otherP].healthVal() == 0) { //if the opponent pokemon has fainted, ask the opponent which pokemon they want to swap with
+			System.out.println(otherTrainer.party()[otherP].getName() + " has fainted");
+				//check which trainer's turn it is, then set the user pokemon (for the opposing/other trainer's battle context) and target pokemon (for the current trainer's battle context) in the battle context accordingly, and swap the current pokemon for the trainer whose turn it is
+				if (trainer1Turn) { //if its trainer1's turn
+					trainer2.party()[currentP2].removeStatus(); //remove the status of the fainted pokemon (for trainer2)
+					currentP2 = switchPokemon(otherTrainer, otherP, scanner); //swap the current pokemon for trainer2
+					return currentP2;
+				} else { //if its trainer2's turn
+					trainer1.party()[currentP1].removeStatus(); //remove the status of the fainted pokemon (for trainer1)
+					currentP1 = switchPokemon(otherTrainer, otherP, scanner); //swap the current pokemon for trainer1
+					return currentP1;
+				}	
+		}
+		else { //if the pokemon has not fainted, print out the pokemon's health
+			System.out.println(otherTrainer.party()[otherP].getName() + " has " + otherTrainer.party()[otherP].healthVal() + " HP remaining");
+		}
+		return 0;
+	}
 	private void useMove(Trainer curr, Trainer other, Move targetMove, BattleContext bc){
-		System.out.println(curr.party()[currentP].getName() + " used " + targetMove.getName());
+		System.out.println(bc.getUser().getName() + " used " + targetMove.getName());
+		
 
-		targetMove.inflictStatus(curr.party()[currentP], other.party()[otherP], bc); //apply the move's effect to the opponent pokemon
+		targetMove.inflictStatus(bc.getUser(), bc.getTarget(), bc); //apply the move's effect to the opponent pokemon
 		
 		//check if current pokemon is skipping turn.
-		if (curr.party()[currentP].getSkipTurn() == true){
+		if (bc.getUser().getSkipTurn() == true){
 			targetMove.successMessage(); //print the success message of the move (ie. "pokemon-name flew up high! (fly)")
 			//check if the current trainer is trainer1 or trainer2, then set the turnSkipMoveDamage accordingly, based on values returned by damageToInflict method
 			if (curr == trainer1){
-				turnSkipMoveDamage_trainer1 = targetMove.damageToInflict(curr.party()[currentP], other.party()[otherP], bc_trainer1);
+				turnSkipMoveDamage_trainer1 = targetMove.damageToInflict(bc.getUser(), bc.getTarget(), bc_trainer1);
 			} else {
-				turnSkipMoveDamage_trainer2 = targetMove.damageToInflict(curr.party()[currentP], other.party()[otherP], bc);
+				turnSkipMoveDamage_trainer2 = targetMove.damageToInflict(bc.getUser(), bc.getTarget(), bc_trainer2);
 			}
 			return;
 		}
-		double damage = targetMove.damageToInflict(curr.party()[currentP], other.party()[otherP], bc);
+		double damage = targetMove.damageToInflict(bc.getUser(), bc.getTarget(), bc);
 		if (damage == -1.0){
+			if (!bc.getTarget().getCanRecieveDamage()){
+				System.out.println("But it failed!");
+				return;
+			}
 			System.out.println(targetMove.failMessage());
 			return;
 		}
@@ -291,17 +328,17 @@ public class Battle {
 			System.out.println(targetMove.successMessage());
 		}
 		//check if the current pokemon has a ability (not null), then use the applyEffect method with the parameters "damage calculation" and the battle context (bc)
-		if (curr.party()[currentP].getAbility() != null) {
-			curr.party()[currentP].getAbility().applyEffect("damage calculation", bc);
+		if (bc.getUser().getAbility() != null) {
+			bc.getUser().getAbility().applyEffect("damage calculation", bc);
 		}
 		if (targetMove.getDamage()!=0){
-			other.party()[otherP].doDamage(damage, targetMove); //doDamage takes in the damage and the move used, and applies the damage to the opposing pokemon
-		}
-		//set wasHit of the opposing trainer's battle context to true
-		if (curr == trainer1) {
-			bc_trainer2.setWasHit(true);
-		} else {
-			bc_trainer1.setWasHit(true);
+			bc.getTarget().doDamage(damage, targetMove); //doDamage takes in the damage and the move used, and applies the damage to the opposing pokemon
+			//set wasHit of the opposing trainer's battle context to true
+			if (curr == trainer1) {
+				bc_trainer2.setWasHit(true);
+			} else {
+				bc_trainer1.setWasHit(true);
+			}
 		}
 	}
 	public void swapPokemon(Scanner scanner){ //swapping pokemon method to be used in other classes
@@ -360,7 +397,7 @@ public class Battle {
 		//set the turnNumber in the battle contexts to 0
 	    bc_trainer1.setTurnNumber(0);
 		bc_trainer2.setTurnNumber(0);
-	    boolean initiative = trainer1.party()[currentP1].getSpeed() > trainer2.party()[currentP2].getSpeed(); //
+	    boolean initiative = trainer1.party()[currentP1].getSpeed() > trainer2.party()[currentP2].getSpeed();
 	    trainer1Turn = trainer1.party()[currentP1].getSpeed() == trainer2.party()[currentP2].getSpeed() ? initiative : trainer1.party()[currentP1].getSpeed() > trainer2.party()[currentP2].getSpeed();
 	    Move trainer1_currMove = null;
 		Move trainer2_currMove = null;
@@ -369,6 +406,11 @@ public class Battle {
 	        Trainer otherTrainer = trainer1Turn ? trainer2 : trainer1;
 	        currentP = trainer1Turn ? currentP1 : currentP2;
 			otherP = trainer1Turn ? currentP2 : currentP1;
+			//print current trainer (debugging purposes)
+			System.out.println(currentTrainer.getName());
+			//print current pokemon (debugging purposes)
+			System.out.println(currentTrainer.party()[currentP].getName());
+
 			//check if the current trainers current pokemon is skipping a turn; if so, skip
 			if (currentTrainer.party()[currentP].getSkipTurn() == true){
 				currentTrainer.party()[currentP].setSkipTurn(false);
@@ -424,28 +466,11 @@ public class Battle {
 				if (currentTrainer.party()[currentP].getCanMove()){
 					if(trainer1Turn) {
 						//set value of trainer1_currMove to the move used by the current pokemon
-						trainer1_currMove = chooseMove(currentP, otherTrainer, otherP, otherTrainer, scanner);
+						trainer1_currMove = chooseMove(currentP, currentTrainer, otherP, otherTrainer, scanner);
+						//chooseMove takes 
 					} else {
 						//set value of trainer2_currMove to the move used by the current pokemon
-						trainer2_currMove = chooseMove(currentP, otherTrainer, otherP, otherTrainer, scanner);
-					}
-					if (otherTrainer.partyFainted()) {
-						System.out.println(otherTrainer.party()[otherP].getName() + " has fainted");
-						break;
-					} else if (otherTrainer.party()[otherP].healthVal() == 0) { //if the opponent pokemon has fainted, ask the opponent which pokemon they want to swap with
-						System.out.println(otherTrainer.party()[otherP].getName() + " has fainted");
-						//check which trainer's turn it is, then set the user pokemon (for the opposing/other trainer's battle context) and target pokemon (for the current trainer's battle context) in the battle context accordingly, and swap the current pokemon for the trainer whose turn it is
-						
-						if (trainer1Turn) { //if its trainer1's turn
-							trainer2.party()[currentP2].removeStatus(); //remove the status of the fainted pokemon (for trainer2)
-							currentP2 = switchPokemon(otherTrainer, otherP, scanner); //swap the current pokemon for trainer2
-						} else { //if its trainer2's turn
-							trainer1.party()[currentP1].removeStatus(); //remove the status of the fainted pokemon (for trainer1)
-							currentP1 = switchPokemon(otherTrainer, otherP, scanner); //swap the current pokemon for trainer1
-						}	
-					}
-					else { //if the pokemon has not fainted, print out the pokemon's health
-						System.out.println(otherTrainer.party()[otherP].getName() + " has " + otherTrainer.party()[otherP].healthVal() + " HP remaining");
+						trainer2_currMove = chooseMove(currentP, currentTrainer, otherP, otherTrainer, scanner);
 					}	
 				}
 				else {
@@ -475,6 +500,20 @@ public class Battle {
 			//check if the pokemon was swapped (if the turn number is 0), and if it was, then leave the number as is. otherwise, increment by 1 (since it is the next turn)
 			if (counterForTurns%2 == 0) {
 				attack(trainer1_currMove, trainer2_currMove);
+				int trainer1_faint = faintedHandler(trainer1, currentP1, scanner);
+				int trainer2_faint = faintedHandler(trainer2, currentP2, scanner);
+				if (trainer1_faint==-1){
+					break; //party fainted, so exit the loop
+				}
+				if (trainer2_faint==-1){
+					break; //party fainted, so exit the loop
+				}
+				if (trainer1_faint!=0){
+					currentP1 = trainer1_faint; //swapped pokemon, so set the current pokemon to the new pokemon
+				}
+				if (trainer2_faint!=0){
+					currentP2 = trainer2_faint; //swapped pokemon, so set the current pokemon to the new pokemon
+				}
 
 				if (!bc_trainer1.getWasSwapped()){
 					bc_trainer1.incrementTurnNumber();

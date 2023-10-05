@@ -225,9 +225,8 @@ public class Battle {
 	}
 
 	//helper method to choose a move. takes in the current pokemon, current trainer, opponent pokemon, opponent trainer, and scanner, and helps the user choose a move for the current pokemon to use
-	private Move chooseMove(int p, Trainer curr, int opP, Trainer other, Scanner scanner){
+	private Move chooseMove(int p, Trainer curr, int opP, Trainer other, Scanner scanner){ 
 		Move targetMove;
-		//if curr == trainer1, then bc = bc_trainer1, else bc = bc_trainer2
 		while (true) {
 			System.out.println("What move should " + curr.party()[p].getName() + " use?");
 			System.out.println(curr.party()[p].getMoves());
@@ -250,13 +249,6 @@ public class Battle {
 	        }
 
 		}
-		//set the move of the respective battle context to the targetMove
-
-		if (curr == trainer1) {
-			bc_trainer1.setMove(targetMove);
-		} else {
-			bc_trainer2.setMove(targetMove);
-		}
 		return targetMove;
 	}
 
@@ -264,7 +256,6 @@ public class Battle {
 		//compare the priorities of the moves (targetMove1, targetMove2), then use useMove accordingly
 		if (targetMove1.getPriority() > targetMove2.getPriority()){
 			useMove(trainer1, trainer2, targetMove1, bc_trainer1);
-			
 			//then use the other move
 			useMove(trainer2, trainer1, targetMove2, bc_trainer2);
 		}
@@ -272,33 +263,6 @@ public class Battle {
 			useMove(trainer2, trainer1, targetMove2, bc_trainer1);
 			//then use the other move
 			useMove(trainer1, trainer2, targetMove1, bc_trainer2);
-		}
-
-		//otherwise, the priorities are equal, so check the speed of the pokemon
-		else {
-			if (trainer1.party()[currentP1].getSpeed() > trainer2.party()[currentP2].getSpeed()){
-				useMove(trainer1, trainer2, targetMove1, bc_trainer1);
-				//then use the other move
-				useMove(trainer2, trainer1, targetMove2, bc_trainer2);
-			}
-			else if (trainer1.party()[currentP1].getSpeed() < trainer2.party()[currentP2].getSpeed()){
-				useMove(trainer2, trainer1, targetMove2, bc_trainer1);
-				//then use the other move
-				useMove(trainer1, trainer2, targetMove1, bc_trainer2);
-			}
-			//otherwise, the speeds are equal, so choose a random pokemon to go first
-			else {
-				if (Math.random() < 0.5){
-					useMove(trainer1, trainer2, targetMove1, bc_trainer1);
-					//then use the other move
-					useMove(trainer2, trainer1, targetMove2, bc_trainer2);
-				}
-				else {
-					useMove(trainer2, trainer1, targetMove2, bc_trainer1);
-					//then use the other move
-					useMove(trainer1, trainer2, targetMove1, bc_trainer2);
-				}
-			}
 		}
 		
 	}
@@ -309,10 +273,10 @@ public class Battle {
 		
 		//check if current pokemon is skipping turn.
 		if (curr.party()[currentP].getSkipTurn() == true){
-			System.out.println(targetMove.successMessage()); //print the success message of the move (ie. "pokemon-name flew up high! (fly)")
+			targetMove.successMessage(); //print the success message of the move (ie. "pokemon-name flew up high! (fly)")
 			//check if the current trainer is trainer1 or trainer2, then set the turnSkipMoveDamage accordingly, based on values returned by damageToInflict method
 			if (curr == trainer1){
-				turnSkipMoveDamage_trainer1 = targetMove.damageToInflict(curr.party()[currentP], other.party()[otherP], bc);
+				turnSkipMoveDamage_trainer1 = targetMove.damageToInflict(curr.party()[currentP], other.party()[otherP], bc_trainer1);
 			} else {
 				turnSkipMoveDamage_trainer2 = targetMove.damageToInflict(curr.party()[currentP], other.party()[otherP], bc);
 			}
@@ -339,8 +303,6 @@ public class Battle {
 		} else {
 			bc_trainer1.setWasHit(true);
 		}
-
-	
 	}
 	public void swapPokemon(Scanner scanner){ //swapping pokemon method to be used in other classes
 		if (trainer1Turn) {
@@ -462,10 +424,28 @@ public class Battle {
 				if (currentTrainer.party()[currentP].getCanMove()){
 					if(trainer1Turn) {
 						//set value of trainer1_currMove to the move used by the current pokemon
-						trainer1_currMove = chooseMove(currentP1, trainer1, currentP2, trainer2, scanner);
+						trainer1_currMove = chooseMove(currentP, otherTrainer, otherP, otherTrainer, scanner);
 					} else {
 						//set value of trainer2_currMove to the move used by the current pokemon
-						trainer2_currMove = chooseMove(currentP2, trainer2, currentP1, trainer1, scanner);
+						trainer2_currMove = chooseMove(currentP, otherTrainer, otherP, otherTrainer, scanner);
+					}
+					if (otherTrainer.partyFainted()) {
+						System.out.println(otherTrainer.party()[otherP].getName() + " has fainted");
+						break;
+					} else if (otherTrainer.party()[otherP].healthVal() == 0) { //if the opponent pokemon has fainted, ask the opponent which pokemon they want to swap with
+						System.out.println(otherTrainer.party()[otherP].getName() + " has fainted");
+						//check which trainer's turn it is, then set the user pokemon (for the opposing/other trainer's battle context) and target pokemon (for the current trainer's battle context) in the battle context accordingly, and swap the current pokemon for the trainer whose turn it is
+						
+						if (trainer1Turn) { //if its trainer1's turn
+							trainer2.party()[currentP2].removeStatus(); //remove the status of the fainted pokemon (for trainer2)
+							currentP2 = switchPokemon(otherTrainer, otherP, scanner); //swap the current pokemon for trainer2
+						} else { //if its trainer2's turn
+							trainer1.party()[currentP1].removeStatus(); //remove the status of the fainted pokemon (for trainer1)
+							currentP1 = switchPokemon(otherTrainer, otherP, scanner); //swap the current pokemon for trainer1
+						}	
+					}
+					else { //if the pokemon has not fainted, print out the pokemon's health
+						System.out.println(otherTrainer.party()[otherP].getName() + " has " + otherTrainer.party()[otherP].healthVal() + " HP remaining");
 					}	
 				}
 				else {
@@ -495,21 +475,6 @@ public class Battle {
 			//check if the pokemon was swapped (if the turn number is 0), and if it was, then leave the number as is. otherwise, increment by 1 (since it is the next turn)
 			if (counterForTurns%2 == 0) {
 				attack(trainer1_currMove, trainer2_currMove);
-				//check if either trainers current pokemon fainted. if so, print faint message, then swap pokemon
-				if (trainer1.party()[currentP1].healthVal() == 0){
-					System.out.println(trainer1.party()[currentP1].getName() + " fainted!");
-					currentP1 = switchPokemon(trainer1, currentP1, scanner);
-				} else {
-					//print the current health of the pokemon
-					System.out.println(trainer1.party()[currentP1].getName() + " has " + trainer1.party()[currentP1].healthVal() + " HP remaining");
-				}
-				if (trainer2.party()[currentP2].healthVal() == 0){
-					System.out.println(trainer2.party()[currentP2].getName() + " fainted!");
-					currentP2 = switchPokemon(trainer2, currentP2, scanner);
-				} else {
-					//print the current health of the pokemon
-					System.out.println(trainer2.party()[currentP2].getName() + " has " + trainer2.party()[currentP2].healthVal() + " HP remaining");
-				}
 
 				if (!bc_trainer1.getWasSwapped()){
 					bc_trainer1.incrementTurnNumber();

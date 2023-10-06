@@ -360,6 +360,14 @@ public class Pokemon {
 	        health -= damage;
 	    }
 	}
+	//another doDamage to be used for recoil (bc the move is calling the doDamage bethod itself, redundant to pass in a move)
+	public void doDamage(double damage) {
+		if (health - damage < 0) {
+	        health = 0;
+	    } else {
+	        health -= damage;
+	    }
+	}
 	public void heal(int healAmount) { //heals the Pokemon by healAmount, but cannot exceed the max HP. must be not fainted to heal
 		if (health == 0 || health == stats[0]) {
 			System.out.println("But it didn't have any effect...");

@@ -5,6 +5,7 @@ public class Move {
 	private ArrayList<Pokemon.PokemonType> type = new ArrayList<Pokemon.PokemonType>();
 	private String name;
 	private int damage;
+	private double damageToBeInflicted = 0;
 	private double criticalPercentage = 0.0416666666666667; //default is 1/24
 	private int baseAccuracy;
 	private boolean usesAccuracy = true;
@@ -83,11 +84,12 @@ public class Move {
 		return baseAccuracy*stagemultiplier;
 	}
 	public double damageToInflict(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) { //returns a -1.0 if the move misses, to be handled in the battle class
+		
 		//first check if targetPokemon can receive damage
 		if (!targetPokemon.getCanRecieveDamage()) {
 			return -1.0;
 		}
-		
+		if (damageToBeInflicted == 0){
 		int level = userPokemon.getLevel();
 		int attack = userPokemon.getAttack();
 		int defense = targetPokemon.getDefense();
@@ -112,6 +114,11 @@ public class Move {
 		}
 		//special case for protect
 		if (this.getName().equals("Protect")) {
+			//if protect was used last, it fails
+			if (bc.getWasHit()){
+				System.out.println("The move failed!");
+				return -1.0;
+			}
 			//only applies if this is not the first time the user used protect - protect decreases in accuracy each time it is used consecutively.
 			if (bc.getConsecutiveProtect() > 0){
 				double accuracy = Math.pow(2/3, bc.getConsecutiveProtect()-1);
@@ -124,7 +131,9 @@ public class Move {
 		if (critical == 1.5) {
 			System.out.println("A critical hit!");
 		}
-		return ((((((((2*level)/5)+2)*power*attack)/defense)/50)+2)*targets*weather*badge*critical*random*STAB*type*burn*other);
+		damageToBeInflicted = ((((((((2*level)/5)+2)*power*attack)/defense)/50)+2)*targets*weather*badge*critical*random*STAB*type*burn*other);
+		}
+		return damageToBeInflicted;
 	}
 	//method to inflict any status effects that the move may have
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -374,10 +383,8 @@ class BraveBird extends Move{
 	//overwrite the inflictStatus method to inflict the status effect of brave bird
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
 		//Brave Bird inflicts damage, and the user receives recoil damage equal to ⅓ of the damage done to the target. If the user inflicts no damage (such as if Disguise takes the damage), they do not take recoil damage.
-		//wip for the case where the user inflicts no damage, but it works otherwise (normally, i mean)
 
-		userPokemon.doDamage(getDamage() / 3);
-
+		userPokemon.doDamage(damageToInflict(userPokemon, targetPokemon, bc) / 3); 
 	}
 
 }
@@ -629,7 +636,7 @@ class TakeDown extends Move{
 	//overwrite the inflictStatus method to inflict the status effect of take down
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
 		//Take Down inflicts damage, and the user receives recoil damage equal to ¼ of the damage done to the target.
-		userPokemon.doDamage(getDamage() / 4);
+		userPokemon.doDamage(damageToInflict(userPokemon, targetPokemon, bc) / 4);
 
 		/**If the user of Take Down attacks first and faints due to recoil damage, the opponent will not attack or be subjected to recurrent damage during that round.
 		Self-inflicted recoil damage from Take Down from the previous turn can be countered if the opponent does not make a move on the following turn.**/

@@ -638,9 +638,6 @@ class TakeDown extends Move{
 		//Take Down inflicts damage, and the user receives recoil damage equal to ¼ of the damage done to the target.
 		userPokemon.doDamage(damageToInflict(userPokemon, targetPokemon, bc) / 4);
 
-		/**If the user of Take Down attacks first and faints due to recoil damage, the opponent will not attack or be subjected to recurrent damage during that round.
-		Self-inflicted recoil damage from Take Down from the previous turn can be countered if the opponent does not make a move on the following turn.**/
-		//wip for the above
 	}
 }
 class IcyWind extends Move{
@@ -684,6 +681,45 @@ class MeteorMash extends Move{
 		//Meteor Mash inflicts damage and has a 20% chance of raising the user's Attack stat by one stage.
 		if (Math.random() < 0.2) {
 			userPokemon.setAttack(userPokemon.getAttack() + 1);
+		}
+	}
+}
+
+class Bite extends Move{
+	public Bite(){
+		super("Bite", 60, 100, true, false, Pokemon.PokemonType.DARK);
+	}
+
+	//overwrite the inflictStatus method to inflict the status effect of bite
+
+	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
+		//30% chance of flinching the opponent
+		if (Math.random() < 0.3) {
+			//apply ability first - if inner focus, don't do anything else
+			if (targetPokemon.getAbility() instanceof InnerFocus) {
+				targetPokemon.getAbility().applyEffect("flinch", bc);
+				return;
+			}
+			else if (targetPokemon.getAbility()!=null) {
+				targetPokemon.getAbility().applyEffect("flinch", bc);
+				
+			}
+			targetPokemon.getStatusCondition().setFlinched(true);
+		}
+	}
+}
+
+class AirSlash extends Move{
+	public AirSlash(){
+		super("Air Slash", 75, 95, true, false, Pokemon.PokemonType.FLYING);
+	}
+
+	//overwrite the inflictStatus method to inflict the status effect of air slash
+
+	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
+		//30% chance of flinching the opponent
+		if (Math.random() < 0.3) {
+			targetPokemon.setCanMove(false);
 		}
 	}
 }

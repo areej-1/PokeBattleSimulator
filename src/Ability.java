@@ -212,16 +212,16 @@ class Rivalry implements Ability{ //Rivalry: "Becomes competitive and deals more
 	}
 }
 
-/*class InnerFocus implements Ability{ //Inner Focus: "The Pokémon is protected from flinching."
+class InnerFocus implements Ability{ //Inner Focus: "The Pokémon is protected from flinching."
 	@Override
 	public void applyEffect(String event, BattleContext context){
 		if ("flinch".equals(event)) {
-			System.out.println(context.getUser()+ "'s Inner Focus activated!");
-			context.setFlinch(false);
+			System.out.println(context.getTarget().getName() + " won't flinch because of its Inner Focus!");
+			context.getUser().getStatusCondition().setFlinched(false);
 		}
 	}
 }
-class SandViel implements Ability{ //Sand Veil: "Boosts the Pokémon's evasion in a sandstorm."
+/*class SandViel implements Ability{ //Sand Veil: "Boosts the Pokémon's evasion in a sandstorm."
 	@Override
 	public void applyEffect(String event, BattleContext context){
 		if ("evasion".equals(event) && context.getWeather().equals("Sandstorm")) {
@@ -251,17 +251,18 @@ class SnowCloak implements Ability{ //Snow Cloak: "Raises evasion in a hailstorm
 			context.setEvasion(context.getEvasion() * 1.25);
 		}
 	}
-}
+}*/
 
 class Steadfast implements Ability{ //Steadfast: "Raises Speed each time the Pokémon flinches."
 	@Override
 	public void applyEffect(String event, BattleContext context){
 		if ("flinch".equals(event)) {
 			System.out.println(context.getUser()+ "'s Steadfast activated!");
-			context.getUser().setSpeed(context.getUser().getSpeed() * 1.5);
+			//increases speed stat by one stage whenever the user flinches
+			context.getUser().setSpeed(context.getUser().getSpeed() + 1);
 		}
 	}
-}*/
+}
 
 
 

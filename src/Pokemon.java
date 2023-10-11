@@ -47,7 +47,7 @@ public class Pokemon {
 	private int[] originalStats = new int[6]; //order is HP, Attack, Defense, SP. Attack, SP. Defense, and Speed. Used for resetting stats after battle/when withdrawn.
 	private Ability ability;
 	private boolean gender; //true -> female, false -> male
-	private StatusCondition status;
+	private StatusCondition status = new StatusCondition(this);
 	private boolean canMove = true;
 	private String item = null;
 

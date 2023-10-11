@@ -81,7 +81,10 @@ public class StatusCondition {
     public void setFlinched(boolean flinched) {
         this.flinched = flinched;
         if (flinched) {
+            context.getUser().setCanMove(false);
             System.out.println(context.getUser().getName() + " flinched!");
+            //make sure to set the user's canMove to false
+
         }
     }
 

@@ -27,6 +27,21 @@ public class Move {
 	public String getName() {
 		return name;
 	}
+	public void flinch(Pokemon targetPokemon, BattleContext bc){
+		//first check if targetPokemon already attacked this turn (if so, flinch fails)
+		if (bc.getWasHit()) { //checking if the user was hit this turn (meaning that the targetPokemon already attacked)
+			return; //don't do anything
+		}
+		//apply ability - if inner focus, don't do anything else
+		if (targetPokemon.getAbility() instanceof InnerFocus) {
+			targetPokemon.getAbility().applyEffect("flinch", bc);
+			return;
+		}
+		else if (targetPokemon.getAbility()!=null) {
+			targetPokemon.getAbility().applyEffect("flinch", bc);		
+		}
+		targetPokemon.getStatusCondition().setFlinched(true);
+	}
 	public String failMessage(){ //returns a message to be printed if the move misses (overwritten in some subclasses)
 		return "The move missed!";
 	}
@@ -270,8 +285,8 @@ class IceFang extends Move{
 		if (Math.random() < 0.1 && !targetPokemon.getType().contains(Pokemon.PokemonType.ICE)) {
 			StatusCondition.frozen(targetPokemon);
 		}
-		if (Math.random() < 0.1) {
-			targetPokemon.setCanMove(false);
+		if (Math.random() < 100) { //testing purposes
+			flinch(targetPokemon, bc);
 
 		}
 	}
@@ -329,7 +344,7 @@ class DarkPulse extends Move{
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon,BattleContext bc) {
 		//20% chance of flinching the opponent
 		if (Math.random() < 0.2) {
-			targetPokemon.setCanMove(false);
+			flinch(targetPokemon, bc);
 		}
 	}
 }
@@ -442,8 +457,7 @@ class Waterfall extends Move{
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon,BattleContext bc) {
 		//20% chance of flinching the opponent
 		if (Math.random() < 0.2) {
-			targetPokemon.setCanMove(false);
-			System.out.println(targetPokemon.getName() + " flinched and cannot move!");
+			flinch(targetPokemon, bc);
 		}
 	}
 }
@@ -695,16 +709,8 @@ class Bite extends Move{
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
 		//30% chance of flinching the opponent
 		if (Math.random() < 0.3) {
-			//apply ability first - if inner focus, don't do anything else
-			if (targetPokemon.getAbility() instanceof InnerFocus) {
-				targetPokemon.getAbility().applyEffect("flinch", bc);
-				return;
-			}
-			else if (targetPokemon.getAbility()!=null) {
-				targetPokemon.getAbility().applyEffect("flinch", bc);
-				
-			}
-			targetPokemon.getStatusCondition().setFlinched(true);
+			//call method in superclass (flinch)
+			flinch(targetPokemon, bc);
 		}
 	}
 }
@@ -719,7 +725,7 @@ class AirSlash extends Move{
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
 		//30% chance of flinching the opponent
 		if (Math.random() < 0.3) {
-			targetPokemon.setCanMove(false);
+			flinch(targetPokemon, bc);
 		}
 	}
 }

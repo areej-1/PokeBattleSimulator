@@ -253,6 +253,13 @@ public class Battle {
 	}
 
 	private void attack(Move targetMove1, Move targetMove2) { //attack method. 
+		//print values of canMove (debugging purposes)
+		//name of current pokemon first tho
+		System.out.println(bc_trainer1.getUser().getName());
+		System.out.println(bc_trainer1.getUser().getCanMove());
+		System.out.println(bc_trainer2.getUser().getName());
+		System.out.println(bc_trainer2.getUser().getCanMove());
+
 		//compare the priorities of the moves (targetMove1, targetMove2), then use useMove accordingly
 		//first, print each move (debugging purposes)
 		System.out.println(targetMove1.getName());

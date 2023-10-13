@@ -485,13 +485,33 @@ public class Pokemon {
 	public StatusCondition getStatusCondition() { //returns the status condition of the Pokemon
 		return status;
 	}
-	public void setStatus(StatusCondition s) { //sets the status condition of the Pokemon
-		status = s;
+	public void setFlinched(boolean flinch) { //sets the Pokemon to flinched
+		status.setFlinched(flinch);
 	}
-	public void removeStatus() { //removes the status condition of the Pokemon
-		status = null;
+	public void setBurned(boolean burn) { //sets the Pokemon to burned
+		status.setBurned(burn);
 	}
-	public void setCanMove(boolean b){
+	public void setPoisoned(boolean poison) { //sets the Pokemon to poisoned
+		status.setPoisoned(poison);
+	}
+	public void setParalyzed(boolean paralyzed) { //sets the Pokemon to paralyzed
+		status.setParalyzed(paralyzed);
+	}
+	public void setAsleep(boolean asleep) { //sets the Pokemon to asleep
+		status.setAsleep(asleep);
+	}
+	public void setFrozen(boolean frozen) { //sets the Pokemon to frozen
+		status.setFrozen(frozen);
+	}
+	public void removeStatus() { //removes the status condition of the Pokemon(aka sets all to false)
+		status.setFlinched(false);
+		status.setBurned(false);
+		status.setPoisoned(false);
+		status.setParalyzed(false);
+		status.setAsleep(false);
+		status.setFrozen(false);
+	}
+	public void setCanMove(boolean b){ 
 		canMove = b;
 	}
 	public boolean getCanMove(){

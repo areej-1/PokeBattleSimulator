@@ -131,23 +131,23 @@ public class Battle {
 					//check if the pokemon has any status conditions. if so, remove them
 					if (t.party()[currentP].getStatusCondition() != null){
 						if (t.party()[currentP].getStatusCondition().isBurned()){
-							t.party()[currentP].setStatus(null);
+							t.party()[currentP].removeStatus();
 							System.out.println(t.party()[currentP].getName() + " was cured of its burn.");
 						}
 						if (t.party()[currentP].getStatusCondition().isPoisoned()){
-							t.party()[currentP].setStatus(null);
+							t.party()[currentP].removeStatus();
 							System.out.println(t.party()[currentP].getName() + " was cured of its poison.");
 						}
 						if (t.party()[currentP].getStatusCondition().isParalyzed()){
-							t.party()[currentP].setStatus(null);
+							t.party()[currentP].removeStatus();
 							System.out.println(t.party()[currentP].getName() + " was cured of its paralysis.");
 						}
 						if (t.party()[currentP].getStatusCondition().isAsleep()){
-							t.party()[currentP].setStatus(null);
+							t.party()[currentP].removeStatus();
 							System.out.println(t.party()[currentP].getName() + " woke up!");
 						}
 						if (t.party()[currentP].getStatusCondition().isFrozen()){
-							t.party()[currentP].setStatus(null);
+							t.party()[currentP].removeStatus();
 							System.out.println(t.party()[currentP].getName() + " was cured of its freeze.");
 						}
 					}
@@ -191,23 +191,23 @@ public class Battle {
 					if (t.party()[currentP].getStatusCondition() != null){
 						System.out.println(t.getName() + " used a Full Heal.");
 						if (t.party()[currentP].getStatusCondition().isBurned()){
-							t.party()[currentP].setStatus(null);
+							t.party()[currentP].removeStatus();
 							System.out.println(t.party()[currentP].getName() + " was cured of its burn.");
 						}
 						if (t.party()[currentP].getStatusCondition().isPoisoned()){
-							t.party()[currentP].setStatus(null);
+							t.party()[currentP].removeStatus();
 							System.out.println(t.party()[currentP].getName() + " was cured of its poison.");
 						}
 						if (t.party()[currentP].getStatusCondition().isParalyzed()){
-							t.party()[currentP].setStatus(null);
+							t.party()[currentP].removeStatus();
 							System.out.println(t.party()[currentP].getName() + " was cured of its paralysis.");
 						}
 						if (t.party()[currentP].getStatusCondition().isAsleep()){
-							t.party()[currentP].setStatus(null);
+							t.party()[currentP].removeStatus();
 							System.out.println(t.party()[currentP].getName() + " woke up!");
 						}
 						if (t.party()[currentP].getStatusCondition().isFrozen()){
-							t.party()[currentP].setStatus(null);
+							t.party()[currentP].removeStatus();
 							System.out.println(t.party()[currentP].getName() + " was cured of its freeze.");
 						}
 						System.out.println(t.party()[currentP].getName() + " was cured of its status condition."); //in the future, replace 'status condition' with the actual status condition's name. its better
@@ -226,6 +226,7 @@ public class Battle {
 
 	//helper method to choose a move. takes in the current pokemon, current trainer, opponent pokemon, opponent trainer, and scanner, and helps the user choose a move for the current pokemon to use
 	private Move chooseMove(int p, Trainer curr, int opP, Trainer other, Scanner scanner){ 
+		
 		Move targetMove;
 		while (true) {
 			System.out.println("What move should " + curr.party()[p].getName() + " use?");
@@ -259,6 +260,7 @@ public class Battle {
 		System.out.println(bc_trainer1.getUser().getCanMove());
 		System.out.println(bc_trainer2.getUser().getName());
 		System.out.println(bc_trainer2.getUser().getCanMove());
+		
 
 		//compare the priorities of the moves (targetMove1, targetMove2), then use useMove accordingly
 		//first, print each move (debugging purposes)
@@ -272,13 +274,17 @@ public class Battle {
 		
 		if (targetMove1.getPriority() > targetMove2.getPriority()){
 			useMove(trainer1, trainer2, targetMove1, bc_trainer1);
+			bc_trainer2.getUser().getStatusCondition().applyEffect(bc_trainer2.getUser());
 			//then use the other move
 			useMove(trainer2, trainer1, targetMove2, bc_trainer2);
+			bc_trainer1.getUser().getStatusCondition().applyEffect(bc_trainer1.getUser());
 		}
 		else if (targetMove1.getPriority() < targetMove2.getPriority()){
 			useMove(trainer2, trainer1, targetMove2, bc_trainer2);
+			bc_trainer1.getUser().getStatusCondition().applyEffect(bc_trainer1.getUser());
 			//then use the other move
 			useMove(trainer1, trainer2, targetMove1, bc_trainer1);
+			bc_trainer2.getUser().getStatusCondition().applyEffect(bc_trainer2.getUser());
 		}
 
 		
@@ -306,6 +312,15 @@ public class Battle {
 		return 0;
 	}
 	private void useMove(Trainer curr, Trainer other, Move targetMove, BattleContext bc){
+		//check first if the current pokemon can move. if not, print that the pokemon cannot move, then return
+		if (!bc.getUser().getCanMove()){
+			if (bc.getUser().getStatusCondition().isFlinched()){
+				return;
+			}
+			System.out.println(bc.getUser().getName() + " cannot move!");
+			return;
+		}
+		
 		System.out.println(bc.getUser().getName() + " used " + targetMove.getName());
 		
 
@@ -418,10 +433,15 @@ public class Battle {
 			//print current pokemon (debugging purposes)
 			System.out.println(currentTrainer.party()[currentP].getName());
 
+			//print the turn number (debugging purposes)
+			System.out.println("Turn number: " + counterForTurns);
 			//check if the current trainers current pokemon is skipping a turn; if so, skip
 			if (currentTrainer.party()[currentP].getSkipTurn() == true){
 				currentTrainer.party()[currentP].setSkipTurn(false);
 				trainer1Turn = !trainer1Turn;
+				//increment the turn number in the battle context
+				bc_trainer1.incrementTurnNumber();
+				bc_trainer2.incrementTurnNumber();
 				continue;
 			}
 			//check which trainer's turn it is, then check if the turnNumber = 0, then use the applyEffect method with the parameters "stats modification" and the battle context (bc)
@@ -454,15 +474,6 @@ public class Battle {
 					turnSkipMoveDamage_trainer2 = 0;
 					//print the hp of the opposing pokemon
 					System.out.println(trainer1.party()[currentP1].getName() + " has " + trainer1.party()[currentP1].healthVal() + " HP remaining");
-				}
-			}
-			if (trainer1Turn) {
-				if (bc_trainer1.getUser().getStatusCondition() != null) {
-					bc_trainer1.getUser().getStatusCondition().applyEffect(currentTrainer.party()[0]);
-				}
-			} else {
-				if (bc_trainer2.getUser().getStatusCondition() != null) {
-					bc_trainer2.getUser().getStatusCondition().applyEffect(currentTrainer.party()[0]);
 				}
 			}
 	        System.out.println("What would you like to do, " + currentTrainer.getName() + "?");

@@ -285,7 +285,7 @@ class IceFang extends Move{
 		if (Math.random() < 0.1 && !targetPokemon.getType().contains(Pokemon.PokemonType.ICE)) {
 			StatusCondition.frozen(targetPokemon);
 		}
-		if (Math.random() < 100) { //testing purposes
+		if (true) { //testing purposes  - change to if (Math.random() < 0.1) {
 			flinch(targetPokemon, bc);
 
 		}

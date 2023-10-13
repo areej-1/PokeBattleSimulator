@@ -7,6 +7,7 @@ public class StatusCondition {
     private boolean flinched;
 
     private BattleContext context;
+    private Pokemon myPokemon;
 
     public StatusCondition(Pokemon pokemon) {
         burned = false;
@@ -16,6 +17,7 @@ public class StatusCondition {
         frozen = false;
         flinched = false;
         context = new BattleContext(pokemon);
+        myPokemon = pokemon;
     }
 
     // Getter and Setter methods
@@ -80,12 +82,6 @@ public class StatusCondition {
 
     public void setFlinched(boolean flinched) {
         this.flinched = flinched;
-        if (flinched) {
-            context.getUser().setCanMove(false);
-            System.out.println(context.getUser().getName() + " flinched!");
-            //make sure to set the user's canMove to false
-
-        }
     }
 
     // Methods to apply the effects of each status condition
@@ -141,7 +137,7 @@ public class StatusCondition {
         // Sleep immobilizes the Pokémon but has a 50% chance of waking up each turn
         if (Math.random() < 0.5) {
             System.out.println(pokemon.getName() + " woke up!");
-            pokemon.setStatus(null);  // Assuming setStatus(null) removes the status
+            pokemon.removeStatus(); 
         } else {
             System.out.println(pokemon.getName() + " is fast asleep!");
             pokemon.setCanMove(false);
@@ -152,7 +148,7 @@ public class StatusCondition {
         // Being frozen immobilizes the Pokémon but has a 20% chance of thawing each turn
         if (Math.random() < 0.2) {
             System.out.println(pokemon.getName() + " thawed out!");
-            pokemon.setStatus(null);  // Assuming setStatus(null) removes the status
+            pokemon.removeStatus();
         } else {
             System.out.println(pokemon.getName() + " is frozen solid!");
             pokemon.setCanMove(false);

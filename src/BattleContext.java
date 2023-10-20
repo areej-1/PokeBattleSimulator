@@ -1,7 +1,7 @@
 public class BattleContext {
     private Pokemon user;
     private Pokemon target;
-    private Move move;
+    private Move move; //move used by the user pokemon
     private double damage;
     private int turnNumber; //turn number (counting how many turns a pokemon has been in battle for; note that it is reset for the specific pokemon if the pokemon is called back, fainted, etc. also, there is a turn number for each pokemon, not just one for the entire battle). to be implemented later (helps with abilities like Huge Power and Intimidate, and moves like Outrage and Thrash, which use the turn number to determine when to stop, or in the case of, say, Huge Power, its only done once (when the pokemon is initially sent out), then the pokemon's attack is set back to normal afterwards (after fainting, call back, etc))
     private double multiplier;

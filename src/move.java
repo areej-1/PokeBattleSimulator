@@ -118,7 +118,10 @@ public class Move {
 		//STAB is the same-type attack bonus. This is equal to 1.5 if the move's type matches any of the user's types, 2 if the user of the move additionally has Adaptability as a ability, and 1 otherwise or if the attacker and/or used move is typeless.
 		double STAB = userPokemon.getSTAB(this);
 		double type = targetPokemon.findMultiplier(this);
-		double burn = 1;
+		double burn = 1; 
+		if (userPokemon.getStatusCondition().isBurned() /*&& this.isPhysical()*/){ //burn halves the attack stat of the user. applies if the pokemon is burned and the move is physical (to be implemented later)
+			burn = 0.5;
+		}
 		double other = 1;
 		//calculate whether or not the move hits
 		if (usesAccuracy) {
@@ -285,7 +288,7 @@ class IceFang extends Move{
 		if (Math.random() < 0.1 && !targetPokemon.getType().contains(Pokemon.PokemonType.ICE)) {
 			StatusCondition.frozen(targetPokemon);
 		}
-		if (true) { //testing purposes  - change to if (Math.random() < 0.1) {
+		if (Math.random() < 0.1) {
 			flinch(targetPokemon, bc);
 
 		}

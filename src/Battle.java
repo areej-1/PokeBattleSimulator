@@ -254,6 +254,24 @@ public class Battle {
 	}
 
 	private void attack(Move targetMove1, Move targetMove2) { //attack method. 
+		//first check if they're null. if both are null, then return. if one is null, use the other move.
+		if (targetMove1 == null && targetMove2 == null){
+			return;
+		}
+		else if (targetMove1 == null){
+			System.out.println("targetMove1 is null");
+			useMove(trainer2, trainer1, bc_trainer2);
+			bc_trainer1.getUser().getStatusCondition().applyEffect(bc_trainer1.getUser());
+			return;
+		}
+		else if (targetMove2 == null){
+			System.out.println("targetMove2 is null");
+			System.out.println(bc_trainer1.getMove());
+			System.out.println(bc_trainer2.getMove());
+			useMove(trainer1, trainer2, bc_trainer1);
+			bc_trainer2.getUser().getStatusCondition().applyEffect(bc_trainer2.getUser());
+			return;
+		}
 		//print values of canMove (debugging purposes)
 		//name of current pokemon first tho
 		System.out.println(bc_trainer1.getUser().getName());
@@ -273,18 +291,38 @@ public class Battle {
 
 		
 		if (targetMove1.getPriority() > targetMove2.getPriority()){
-			useMove(trainer1, trainer2, targetMove1, bc_trainer1);
+			useMove(trainer1, trainer2, bc_trainer1);
 			bc_trainer2.getUser().getStatusCondition().applyEffect(bc_trainer2.getUser());
 			//then use the other move
-			useMove(trainer2, trainer1, targetMove2, bc_trainer2);
+			useMove(trainer2, trainer1, bc_trainer2);
 			bc_trainer1.getUser().getStatusCondition().applyEffect(bc_trainer1.getUser());
+			return;
 		}
 		else if (targetMove1.getPriority() < targetMove2.getPriority()){
-			useMove(trainer2, trainer1, targetMove2, bc_trainer2);
+			useMove(trainer2, trainer1, bc_trainer2);
 			bc_trainer1.getUser().getStatusCondition().applyEffect(bc_trainer1.getUser());
 			//then use the other move
-			useMove(trainer1, trainer2, targetMove1, bc_trainer1);
+			useMove(trainer1, trainer2, bc_trainer1);
 			bc_trainer2.getUser().getStatusCondition().applyEffect(bc_trainer2.getUser());
+			return;
+		}
+
+		//otherwise, if the priorities are equal the faster pokemon will go first
+		if (bc_trainer1.getUser().getSpeed() > bc_trainer2.getUser().getSpeed()){
+			useMove(trainer1, trainer2, bc_trainer1);
+			bc_trainer2.getUser().getStatusCondition().applyEffect(bc_trainer2.getUser());
+			//then use the other move
+			useMove(trainer2, trainer1, bc_trainer2);
+			bc_trainer1.getUser().getStatusCondition().applyEffect(bc_trainer1.getUser());
+			return;
+		}
+		else if (bc_trainer2.getUser().getSpeed() > bc_trainer1.getUser().getSpeed()){
+			useMove(trainer2, trainer1, bc_trainer2);
+			bc_trainer1.getUser().getStatusCondition().applyEffect(bc_trainer1.getUser());
+			//then use the other move
+			useMove(trainer1, trainer2, bc_trainer1);
+			bc_trainer2.getUser().getStatusCondition().applyEffect(bc_trainer2.getUser());
+			return;
 		}
 
 		
@@ -311,7 +349,7 @@ public class Battle {
 		}
 		return 0;
 	}
-	private void useMove(Trainer curr, Trainer other, Move targetMove, BattleContext bc){
+	private void useMove(Trainer curr, Trainer other, BattleContext bc){
 		//check first if the current pokemon can move. if not, print that the pokemon cannot move, then return
 		if (!bc.getUser().getCanMove()){
 			if (bc.getUser().getStatusCondition().isFlinched()){
@@ -321,40 +359,40 @@ public class Battle {
 			return;
 		}
 		
-		System.out.println(bc.getUser().getName() + " used " + targetMove.getName());
+		System.out.println(bc.getUser().getName() + " used " + bc.getMove()); //bc.getMove() gives the name of the move used by the current pokemon
 		
 
-		targetMove.inflictStatus(bc.getUser(), bc.getTarget(), bc); //apply the move's effect to the opponent pokemon
+		bc.getMove().inflictStatus(bc.getUser(), bc.getTarget(), bc); //apply the move's effect to the opponent pokemon
 		
 		//check if current pokemon is skipping turn.
 		if (bc.getUser().getSkipTurn() == true){
-			targetMove.successMessage(); //print the success message of the move (ie. "pokemon-name flew up high! (fly)")
+			bc.getMove().successMessage(); //print the success message of the move (ie. "pokemon-name flew up high! (fly)")
 			//check if the current trainer is trainer1 or trainer2, then set the turnSkipMoveDamage accordingly, based on values returned by damageToInflict method
 			if (curr == trainer1){
-				turnSkipMoveDamage_trainer1 = targetMove.damageToInflict(bc.getUser(), bc.getTarget(), bc_trainer1);
+				turnSkipMoveDamage_trainer1 = bc.getMove().damageToInflict(bc.getUser(), bc.getTarget(), bc_trainer1);
 			} else {
-				turnSkipMoveDamage_trainer2 = targetMove.damageToInflict(bc.getUser(), bc.getTarget(), bc_trainer2);
+				turnSkipMoveDamage_trainer2 = bc.getMove().damageToInflict(bc.getUser(), bc.getTarget(), bc_trainer2);
 			}
 			return;
 		}
-		double damage = targetMove.damageToInflict(bc.getUser(), bc.getTarget(), bc);
+		double damage = bc.getMove().damageToInflict(bc.getUser(), bc.getTarget(), bc);
 		if (damage == -1.0){
 			if (!bc.getTarget().getCanRecieveDamage()){
 				System.out.println("But it failed!");
 				return;
 			}
-			System.out.println(targetMove.failMessage());
+			System.out.println(bc.getMove().failMessage());
 			return;
 		}
 		else {
-			System.out.println(targetMove.successMessage());
+			System.out.println(bc.getMove().successMessage());
 		}
 		//check if the current pokemon has a ability (not null), then use the applyEffect method with the parameters "damage calculation" and the battle context (bc)
 		if (bc.getUser().getAbility() != null) {
 			bc.getUser().getAbility().applyEffect("damage calculation", bc);
 		}
-		if (targetMove.getDamage()!=0){
-			bc.getTarget().doDamage(damage, targetMove); //doDamage takes in the damage and the move used, and applies the damage to the opposing pokemon
+		if (bc.getMove().getDamage()!=0){
+			bc.getTarget().doDamage(damage, bc.getMove()); //doDamage takes in the damage and the move used, and applies the damage to the opposing pokemon
 			//set wasHit of the opposing trainer's battle context to true
 			if (curr == trainer1) {
 				bc_trainer2.setWasHit(true);
@@ -485,10 +523,12 @@ public class Battle {
 					if(trainer1Turn) {
 						//set value of trainer1_currMove to the move used by the current pokemon
 						trainer1_currMove = chooseMove(currentP, currentTrainer, otherP, otherTrainer, scanner);
+						bc_trainer1.setMove(trainer1_currMove); //set the move in the battle context
 						//chooseMove takes 
 					} else {
 						//set value of trainer2_currMove to the move used by the current pokemon
 						trainer2_currMove = chooseMove(currentP, currentTrainer, otherP, otherTrainer, scanner);
+						bc_trainer2.setMove(trainer2_currMove); //set the move in the battle context
 					}	
 				}
 				else {

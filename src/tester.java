@@ -17,7 +17,7 @@ public class tester {
 		Pokemon s = new Pokemon("Luxray", "Electric", 67, "Gleam Eyes", 198, 195, 120, 179, 124, 137, rivalry, true, scanner);
 		h.setParty(b, c, s, k, f);
 		h.setBag("Potion", "Potion", "Potion", "Super Potion", "Max Potion", "Max Potion", "Max Potion", "Revive"); //set bag
-		h.swapPositions(m, b);
+		//h.swapPositions(m, b);
 		PartnerPokemon n = new PartnerPokemon("Infernape", "Fire/Fighting", 61, "Flame", 186, 160, 109, 130, 111, 175, blaze, false, scanner);
 		Trainer a = new Trainer("Arkn", 8, n, "Nape", "064121", 100000);
 		Pokemon ga = new Pokemon("Garchomp", "Dragon/Ground", 55, "Mach", 196, 162, 128, 111, 106, 152, null, true, scanner);
@@ -26,7 +26,7 @@ public class tester {
 		Pokemon lux = new Pokemon("Luxray", "Electric", 56, "Gleam Eyes", 167, 152, 113, 133, 110, 160, intimidate, false, scanner);
 		Pokemon ma = new Pokemon("Piloswine", "Ice/Ground", 55, "Twin Tusk", 187, 141, 103, 95, 84, 104, null, false, scanner);
 		a.setParty(st, lux, ga, ma, luc);
-		a.swapPositions(n, luc); 
+		//a.swapPositions(n, luc); 
 		a.setBag("Potion", "Potion", "Potion", "Super Potion", "Max Potion", "Max Potion", "Max Potion", "Revive"); //set bag
 		/*for (int i = 0; i <h.party().length; i++) {
 			h.party()[i].setMoves(scanner); //set moves

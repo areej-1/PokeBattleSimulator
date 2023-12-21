@@ -232,7 +232,6 @@ public class Battle {
 			System.out.println("What move should " + curr.party()[p].getName() + " use?");
 			System.out.println(curr.party()[p].getMoves());
 			String n = scanner.nextLine();
-			System.out.println(inputHandler(n, scanner));
 			if (!inputHandler(n, scanner).contains("invalid")){
 				targetMove = Arrays.stream(curr.party()[p].moves())
 	                .filter(move -> (inputHandler(n, scanner)).equals(move.getName()))
@@ -253,88 +252,91 @@ public class Battle {
 		return targetMove;
 	}
 
-	private void attack(Move targetMove1, Move targetMove2) { //attack method. 
-		//first check if they're null. if both are null, then return. if one is null, use the other move.
+	private void attack(Move targetMove1, Move targetMove2) {
+		System.out.println("Entering attack method");
+	
+		// Check if both moves are null
 		if (targetMove1 == null && targetMove2 == null){
+			System.out.println("Both targetMove1 and targetMove2 are null");
 			return;
 		}
-		else if (targetMove1 == null){
-			System.out.println("targetMove1 is null");
+	
+		// Handle cases where one of the moves is null
+		if (targetMove1 == null){
+			System.out.println("targetMove1 is null, using targetMove2");
 			useMove(trainer2, trainer1, bc_trainer2);
 			bc_trainer1.getUser().getStatusCondition().applyEffect(bc_trainer1.getUser());
 			return;
-		}
-		else if (targetMove2 == null){
-			System.out.println("targetMove2 is null");
-			System.out.println(bc_trainer1.getMove());
-			System.out.println(bc_trainer2.getMove());
+		} else if (targetMove2 == null){
+			System.out.println("targetMove2 is null, using targetMove1");
 			useMove(trainer1, trainer2, bc_trainer1);
 			bc_trainer2.getUser().getStatusCondition().applyEffect(bc_trainer2.getUser());
 			return;
 		}
-		//print values of canMove (debugging purposes)
-		//name of current pokemon first tho
-		System.out.println(bc_trainer1.getUser().getName());
-		System.out.println(bc_trainer1.getUser().getCanMove());
-		System.out.println(bc_trainer2.getUser().getName());
-		System.out.println(bc_trainer2.getUser().getCanMove());
-		
-
-		//compare the priorities of the moves (targetMove1, targetMove2), then use useMove accordingly
-		//first, print each move (debugging purposes)
-		System.out.println(targetMove1.getName());
-		System.out.println(targetMove2.getName());
-		//print the priority of each move (debugging purposes)
-		System.out.println(targetMove1.getPriority());
-		System.out.println(targetMove2.getPriority());
-		//determine which trainer has each move (targetMove1, targetMove2)
-
-		
+	
+		// Debugging output for current Pokémon and their ability to move
+		System.out.println("Trainer1's Pokémon: " + bc_trainer1.getUser().getName() + ", Can Move: " + bc_trainer1.getUser().getCanMove());
+		System.out.println("Trainer2's Pokémon: " + bc_trainer2.getUser().getName() + ", Can Move: " + bc_trainer2.getUser().getCanMove());
+	
+		// Output move names and priorities
+		System.out.println("Move1: " + targetMove1.getName() + ", Priority: " + targetMove1.getPriority());
+		System.out.println("Move2: " + targetMove2.getName() + ", Priority: " + targetMove2.getPriority());
+	
+		// Compare priorities of moves and use them accordingly
 		if (targetMove1.getPriority() > targetMove2.getPriority()){
+			System.out.println("Move1 has higher priority, using Move1 first");
 			useMove(trainer1, trainer2, bc_trainer1);
+			System.out.println("Applying status effect after Move1");
 			bc_trainer2.getUser().getStatusCondition().applyEffect(bc_trainer2.getUser());
-			//then use the other move
+			System.out.println("Using Move2 next");
 			useMove(trainer2, trainer1, bc_trainer2);
+			System.out.println("Applying status effect after Move2");
 			bc_trainer1.getUser().getStatusCondition().applyEffect(bc_trainer1.getUser());
-			return;
-		}
-		else if (targetMove1.getPriority() < targetMove2.getPriority()){
+		} else if (targetMove1.getPriority() < targetMove2.getPriority()){
+			System.out.println("Move2 has higher priority, using Move2 first");
 			useMove(trainer2, trainer1, bc_trainer2);
+			System.out.println("Applying status effect after Move2");
 			bc_trainer1.getUser().getStatusCondition().applyEffect(bc_trainer1.getUser());
-			//then use the other move
+			System.out.println("Using Move1 next");
 			useMove(trainer1, trainer2, bc_trainer1);
+			System.out.println("Applying status effect after Move1");
 			bc_trainer2.getUser().getStatusCondition().applyEffect(bc_trainer2.getUser());
-			return;
+		} else {
+			// Handling equal priority with speed check
+			System.out.println("Moves have equal priority, checking speed");
+			if (bc_trainer1.getUser().getSpeed() > bc_trainer2.getUser().getSpeed()){
+				System.out.println("Trainer1's Pokémon is faster, using Move1 first");
+				useMove(trainer1, trainer2, bc_trainer1);
+				System.out.println("Applying status effect after Move1");
+				bc_trainer2.getUser().getStatusCondition().applyEffect(bc_trainer2.getUser());
+				System.out.println("Using Move2 next");
+				useMove(trainer2, trainer1, bc_trainer2);
+				System.out.println("Applying status effect after Move2");
+				bc_trainer1.getUser().getStatusCondition().applyEffect(bc_trainer1.getUser());
+			} else {
+				System.out.println("Trainer2's Pokémon is faster, using Move2 first");
+				useMove(trainer2, trainer1, bc_trainer2);
+				System.out.println("Applying status effect after Move2");
+				bc_trainer1.getUser().getStatusCondition().applyEffect(bc_trainer1.getUser());
+				System.out.println("Using Move1 next");
+				useMove(trainer1, trainer2, bc_trainer1);
+				System.out.println("Applying status effect after Move1");
+				bc_trainer2.getUser().getStatusCondition().applyEffect(bc_trainer2.getUser());
+			}
 		}
-
-		//otherwise, if the priorities are equal the faster pokemon will go first
-		if (bc_trainer1.getUser().getSpeed() > bc_trainer2.getUser().getSpeed()){
-			useMove(trainer1, trainer2, bc_trainer1);
-			bc_trainer2.getUser().getStatusCondition().applyEffect(bc_trainer2.getUser());
-			//then use the other move
-			useMove(trainer2, trainer1, bc_trainer2);
-			bc_trainer1.getUser().getStatusCondition().applyEffect(bc_trainer1.getUser());
-			return;
-		}
-		else if (bc_trainer2.getUser().getSpeed() > bc_trainer1.getUser().getSpeed()){
-			useMove(trainer2, trainer1, bc_trainer2);
-			bc_trainer1.getUser().getStatusCondition().applyEffect(bc_trainer1.getUser());
-			//then use the other move
-			useMove(trainer1, trainer2, bc_trainer1);
-			bc_trainer2.getUser().getStatusCondition().applyEffect(bc_trainer2.getUser());
-			return;
-		}
-
-		
+		System.out.println("Exiting attack method");
 	}
+	
 	private int faintedHandler(Trainer otherTrainer, int otherP, Scanner scanner){
 		if (otherTrainer.partyFainted()) {
 			System.out.println(otherTrainer.party()[otherP].getName() + " has fainted");
 			return -1;
 		} else if (otherTrainer.party()[otherP].healthVal() == 0) { //if the opponent pokemon has fainted, ask the opponent which pokemon they want to swap with
 			System.out.println(otherTrainer.party()[otherP].getName() + " has fainted");
-				//check which trainer's turn it is, then set the user pokemon (for the opposing/other trainer's battle context) and target pokemon (for the current trainer's battle context) in the battle context accordingly, and swap the current pokemon for the trainer whose turn it is
-				if (trainer1Turn) { //if its trainer1's turn
+			otherTrainer.party()[otherP].removeStatus(); //remove the status of the fainted pokemon (for trainer1)
+			otherP = switchPokemon(otherTrainer, otherP, scanner); //swap the current pokemon for trainer1
+			return otherP;
+				/*if (trainer1Turn) { //if its trainer1's turn
 					trainer2.party()[currentP2].removeStatus(); //remove the status of the fainted pokemon (for trainer2)
 					currentP2 = switchPokemon(otherTrainer, otherP, scanner); //swap the current pokemon for trainer2
 					return currentP2;
@@ -342,7 +344,7 @@ public class Battle {
 					trainer1.party()[currentP1].removeStatus(); //remove the status of the fainted pokemon (for trainer1)
 					currentP1 = switchPokemon(otherTrainer, otherP, scanner); //swap the current pokemon for trainer1
 					return currentP1;
-				}	
+				}*/
 		}
 		else { //if the pokemon has not fainted, print out the pokemon's health
 			System.out.println(otherTrainer.party()[otherP].getName() + " has " + otherTrainer.party()[otherP].healthVal() + " HP remaining");
@@ -350,12 +352,23 @@ public class Battle {
 		return 0;
 	}
 	private void useMove(Trainer curr, Trainer other, BattleContext bc){
+		int currentP = curr == trainer1 ? currentP1 : currentP2;
+		//check if the current pokemon is fainted
+		if (curr.party()[currentP].healthVal() == 0){
+			System.out.println("useMove: pokemon fainted");
+			return;
+		}
 		//check first if the current pokemon can move. if not, print that the pokemon cannot move, then return
 		if (!bc.getUser().getCanMove()){
+			System.out.println("useMove: pokemon can't move");
 			if (bc.getUser().getStatusCondition().isFlinched()){
 				return;
 			}
 			System.out.println(bc.getUser().getName() + " cannot move!");
+			return;
+		}
+		if (bc.getUser().getStatusCondition().isTaunted() && !bc.getMove().isDamaging()){
+			System.out.println(bc.getUser().getName() + " is taunted and cannot use " + bc.getMove().getName() + "!");
 			return;
 		}
 		
@@ -451,6 +464,7 @@ public class Battle {
 	    System.out.println("This is a battle between " + trainer1.getName() + " and " + trainer2.getName() + ". Battle begin!");
 	    System.out.println(trainer1.getName() + " sent out " + trainer1.party()[0].getName());
 	    System.out.println(trainer2.getName() + " sent out " + trainer2.party()[0].getName());
+		System.out.println("----------------------"); //print a line to separate
 	    currentP1 = 0;
 		currentP2 = 0;
 	    String input;
@@ -466,11 +480,10 @@ public class Battle {
 	        Trainer otherTrainer = trainer1Turn ? trainer2 : trainer1;
 	        currentP = trainer1Turn ? currentP1 : currentP2;
 			otherP = trainer1Turn ? currentP2 : currentP1;
-			//print current trainer (debugging purposes)
-			System.out.println(currentTrainer.getName());
-			//print current pokemon (debugging purposes)
-			System.out.println(currentTrainer.party()[currentP].getName());
-
+			System.out.println(trainer1.getName() + "'s " + trainer1.party()[currentP1].getName());
+			System.out.println(trainer2.getName() + "'s " + trainer2.party()[currentP2].getName());
+			//print the current trainers name
+			System.out.println(currentTrainer.getName() + "'s turn!");
 			//print the turn number (debugging purposes)
 			System.out.println("Turn number: " + counterForTurns);
 			//check if the current trainers current pokemon is skipping a turn; if so, skip
@@ -557,6 +570,7 @@ public class Battle {
 			//System.out.println("Trainer 2 current pokemon's can recieve damage: "+ trainer2.party()[currentP2].getCanRecieveDamage());
 			//check if the pokemon was swapped (if the turn number is 0), and if it was, then leave the number as is. otherwise, increment by 1 (since it is the next turn)
 			if (counterForTurns%2 == 0) {
+				System.out.println("----------***----------");
 				attack(trainer1_currMove, trainer2_currMove);
 				int trainer1_faint = faintedHandler(trainer1, currentP1, scanner);
 				int trainer2_faint = faintedHandler(trainer2, currentP2, scanner);
@@ -596,10 +610,17 @@ public class Battle {
 					trainer2.party()[currentP2].endTurnReset();
 				}
 
+
 			}
 			//System.out.println("Trainer 1 current pokemon's can recieve damage: "+ trainer1.party()[currentP1].getCanRecieveDamage());
 			//System.out.println("Trainer 2 current pokemon's can recieve damage: "+ trainer2.party()[currentP2].getCanRecieveDamage());
 			
+			System.out.println(trainer1.getName() + "'s " + trainer1.party()[currentP1].getName());
+			System.out.println(trainer2.getName() + "'s " + trainer2.party()[currentP2].getName());
+
+			System.out.println("----------------------"); //print a line to separate each turn
+
+
 
 
 	    } 

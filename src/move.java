@@ -11,6 +11,7 @@ public class Move {
 	private boolean usesAccuracy = true;
 	private boolean isTwoTurn = false;
 	private int priority = 0; //default priority is 0
+	private boolean isDamaging = true; //default is it is a damaging move
 	public Move(String n, int damage, int baseAccuracy, boolean usesAccuracy, boolean isTwoTurn, Pokemon.PokemonType ... t) {
 		for (Pokemon.PokemonType type : t) {
 			this.type.add(type);
@@ -26,6 +27,12 @@ public class Move {
 	}
 	public String getName() {
 		return name;
+	}
+	public boolean isDamaging(){
+		return isDamaging;
+	}
+	public void setDamaging(boolean isDamaging) {
+		this.isDamaging = isDamaging;
 	}
 	public void flinch(Pokemon targetPokemon, BattleContext bc){
 		//first check if targetPokemon already attacked this turn (if so, flinch fails)
@@ -94,9 +101,9 @@ public class Move {
 		}
 	}
 	//method to determine the move accuracy
-	public double accuracy(Pokemon userPokemon, Pokemon targetPokemon){
-		double stagemultiplier = Pokemon.getValue(userPokemon.getAccuracyStage()-targetPokemon.getEvasionStage());
-		return baseAccuracy*stagemultiplier;
+	public double accuracy(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc){
+		double stagemultiplier = Pokemon.getValue(userPokemon.getAccuracy()-targetPokemon.getEvasion());
+		return baseAccuracy*stagemultiplier*bc.getEvasion()*bc.getAccuracy();
 	}
 	public double damageToInflict(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) { //returns a -1.0 if the move misses, to be handled in the battle class
 		
@@ -125,7 +132,7 @@ public class Move {
 		double other = 1;
 		//calculate whether or not the move hits
 		if (usesAccuracy) {
-			if (Math.random() > accuracy(userPokemon, targetPokemon)) {
+			if (Math.random() > accuracy(userPokemon, targetPokemon, bc)) {
 				System.out.println("The move missed!");
 				return -1.0;
 			}
@@ -197,7 +204,7 @@ class Thunderbolt extends Move {
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
 		//10% chance of paralyzing the opponent
 		if (Math.random() < 0.1) {
-			StatusCondition.paralyzed(targetPokemon);
+			targetPokemon.setParalyzed(true);
 		}
 	}
 }
@@ -209,7 +216,7 @@ class Flamethrower extends Move {
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
 		//10% chance of burning the opponent
 		if (Math.random() < 0.1) {
-			StatusCondition.burn(targetPokemon);
+			targetPokemon.setBurned(true);
 		}
 	}
 
@@ -222,7 +229,7 @@ class IceBeam extends Move {
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
 		//10% chance of freezing the opponent
 		if (Math.random() < 0.1) {
-			StatusCondition.frozen(targetPokemon);
+			targetPokemon.setFrozen(true);
 		}
 	}
 }
@@ -243,7 +250,7 @@ class ThunderPunch extends Move{
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
 		//10% chance of paralyzing the opponent, as long as the opponent is not a electric type
 		if (Math.random() < 0.1 && !targetPokemon.getType().contains(Pokemon.PokemonType.ELECTRIC)) {
-			StatusCondition.paralyzed(targetPokemon);
+			targetPokemon.setParalyzed(true);
 		}
 	}
 }
@@ -256,14 +263,14 @@ class FlareBlitz extends Move{
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
 		//10% chance of burning the opponent, as long as the opponent is not a fire type. also, the user of the move takes 1/3 of the damage dealt as recoil damage. if the user is frozen, flare blitz will thaw the user out, then deal recoil damage
 		if (Math.random() < 0.1 && !targetPokemon.getType().contains(Pokemon.PokemonType.FIRE)) {
-			StatusCondition.burn(targetPokemon);
+			targetPokemon.setBurned(true);
 		}
 		if (userPokemon.getStatusCondition().isFrozen()) {
 			userPokemon.getStatusCondition().setFrozen(false);
 
 		}
 		userPokemon.doDamage((int)(getDamage()/3));
-		System.out.print(userPokemon.getName() + " was hurt by recoil!");
+		System.out.println(userPokemon.getName() + " was hurt by recoil!");
 	}
 }
 
@@ -286,7 +293,7 @@ class IceFang extends Move{
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
 		//10% chance of freezing the opponent, as long as the opponent is not a ice type. also, 10% chance of flinching the opponent
 		if (Math.random() < 0.1 && !targetPokemon.getType().contains(Pokemon.PokemonType.ICE)) {
-			StatusCondition.frozen(targetPokemon);
+			targetPokemon.setFrozen(true);
 		}
 		if (Math.random() < 0.1) {
 			flinch(targetPokemon, bc);
@@ -323,6 +330,7 @@ class AuraSphere extends Move{
 	}
 	//overwrite the inflictStatus method to inflict the status effect of aura sphere
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
+		//Aura Sphere inflicts damage and ignores changes to the Accuracy and Evasion stats.
 	}
 }
 
@@ -360,7 +368,7 @@ class ThunderFang extends Move{
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
 		//10% chance of paralyzing the opponent, as long as the opponent is not a electric type. also, 10% chance of flinching the opponent
 		if (Math.random() < 0.1 && !targetPokemon.getType().contains(Pokemon.PokemonType.ELECTRIC)) {
-			StatusCondition.paralyzed(targetPokemon);
+			targetPokemon.setParalyzed(true);
 		}
 		if (Math.random() < 0.1) {
 			targetPokemon.setCanMove(false);
@@ -444,6 +452,7 @@ class DragonClaw extends Move{
 class SwordsDance extends Move{
 	public SwordsDance(){
 		super("Swords Dance", 0, 0, false, false, Pokemon.PokemonType.NORMAL);
+		setDamaging(false);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of swords dance
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -497,6 +506,7 @@ class VoltSwitch extends Move{
 class Roost extends Move{
 	public Roost(){
 		super("Roost", 0, 0, false, false, Pokemon.PokemonType.FLYING);
+		setDamaging(false);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of roost
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon,BattleContext bc) {
@@ -525,6 +535,7 @@ class Protect extends Move{
 		super("Protect", 0, 0, false, false, Pokemon.PokemonType.NORMAL);
 		//set priority to +4
 		setPriority(4);
+		setDamaging(false);
 	}
 	//overwrite the inflictStatus method to inflict the status effect of protect
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
@@ -575,7 +586,7 @@ class Acrobatics extends Move{
 		//Acrobatics inflicts damage and has no secondary effect. 
 		//However, if the user is not holding an item, Acrobatics's base power doubles from 55 to 110.
 		if (userPokemon.getItem() == null) {
-			userPokemon.setAttack(userPokemon.getAttack() * 2);
+			setDamage(110);
 		}
 	}
 }
@@ -597,7 +608,7 @@ class FlameWheel extends Move{
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
 		//10% chance of burning the opponent
 		if (Math.random() < 0.1) {
-			StatusCondition.burn(targetPokemon);
+			targetPokemon.setBurned(true);
 		}
 		//Flame Wheel will thaw out the user if it is frozen too.
 		if (userPokemon.getStatusCondition() != null && userPokemon.getStatusCondition().isFrozen()) {
@@ -609,13 +620,14 @@ class FlameWheel extends Move{
 class ThunderWave extends Move{
 	public ThunderWave(){
 		super("Thunder Wave", 0, 100, true, false, Pokemon.PokemonType.ELECTRIC);
+		setDamaging(false);
 	}
 
 	//overwrite the inflictStatus method to inflict the status effect of thunder wave
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
 		//Thunder Wave paralyzes the target, as long as it is not a Ground-type Pokémon.
 		if (!targetPokemon.getType().contains(Pokemon.PokemonType.GROUND)) {
-			StatusCondition.paralyzed(targetPokemon);
+			targetPokemon.setParalyzed(true);
 		}
 	}
 }
@@ -628,7 +640,7 @@ class Spark extends Move{
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
 		//30% chance of paralyzing the opponent, as long as the opponent is not a electric type <-- double check that it actually checks the opponent's type
 		if (Math.random() < 0.3 && !targetPokemon.getType().contains(Pokemon.PokemonType.ELECTRIC)) {
-			StatusCondition.paralyzed(targetPokemon);
+			targetPokemon.setParalyzed(true);
 		}
 	}
 }
@@ -641,7 +653,7 @@ class DragonBreath extends Move{
 	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
 		//30% chance of paralyzing the opponent
 		if (Math.random() < 0.3) {
-			StatusCondition.paralyzed(targetPokemon);
+			targetPokemon.setParalyzed(true);
 		}
 	}
 }
@@ -730,5 +742,38 @@ class AirSlash extends Move{
 		if (Math.random() < 0.3) {
 			flinch(targetPokemon, bc);
 		}
+	}
+}
+
+class Attract extends Move{
+	public Attract(){
+		super("Attract", 0, 100, true, false, Pokemon.PokemonType.NORMAL);
+		setDamaging(false);
+	}
+
+	//overwrite the inflictStatus method to inflict the status effect of attract
+
+	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc){
+		//Attract inflicts no damage, but has a 50% chance of infatuating the target Pokémon.
+
+		if (Math.random() < 0.5) {
+			targetPokemon.getStatusCondition().setInfatuated(true);
+		}
+		if (bc.getTarget().getAbility() != null) bc.getTarget().getAbility().applyEffect("infatuation", bc);
+	}
+}
+
+class Taunt extends Move{
+	public Taunt(){
+		super("Taunt", 0, 100, true, false, Pokemon.PokemonType.DARK);
+		setDamaging(false);
+	}
+
+	//overwrite the inflictStatus method to inflict the status effect of taunt
+
+	public void inflictStatus(Pokemon userPokemon, Pokemon targetPokemon, BattleContext bc) {
+		//Taunt prevents the target from using non-damaging moves for three turns.
+		targetPokemon.getStatusCondition().setTaunted(true);
+		if (bc.getTarget().getAbility() != null) bc.getTarget().getAbility().applyEffect("taunt", bc);
 	}
 }

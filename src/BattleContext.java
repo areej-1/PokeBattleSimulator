@@ -10,6 +10,10 @@ public class BattleContext {
     private boolean wasSwapped = false; //boolean variable that stores whether or not the user pokemon was swapped out in the current turn. false by default.
     //variable for consecutive turns protect (used in the move class for the protect move)
     private int consecutiveTurnsProtect = 0;
+    private String weather = "None"; //variable for weather (used in the move class for the weather moves)
+    private double evasion = 1.0;
+    private double accuracy = 1.0;
+
     //constructors for all possible combinations of parameters (doesn't have to be all of the parameters; can be less than five)
     public BattleContext(Pokemon user, Pokemon target, Move move, double damage) {
         this.user = user;
@@ -270,6 +274,41 @@ public class BattleContext {
         this.user = user;
         this.turnNumber = turnNumber;
     }
+    public BattleContext(Pokemon user, Pokemon target, int turnNumber, Battle battle){
+        this.currentBattle = battle;
+        this.user = user;
+        this.target = target;
+        this.turnNumber = turnNumber;
+    }
+    public BattleContext(Pokemon user, Move move, int turnNumber, String weather, Battle battle){
+        this.weather = weather;
+        this.user = user;
+        this.move = move;
+        this.turnNumber = turnNumber;
+        this.currentBattle = battle;
+    }
+    public BattleContext(Pokemon user, Pokemon target, Move move, int turnNumber, String weather, Battle battle){
+        this.weather = weather;
+        this.user = user;
+        this.target = target;
+        this.move = move;
+        this.turnNumber = turnNumber;
+        this.currentBattle = battle;
+    }
+    public BattleContext(Pokemon user, double damage, int turnNumber, Battle battle){
+        this.currentBattle = battle;
+        this.user = user;
+        this.damage = damage;
+        this.turnNumber = turnNumber;
+    }
+    public BattleContext(Pokemon user, Pokemon target, double damage, int turnNumber, Battle battle){
+        this.currentBattle = battle;
+        this.user = user;
+        this.target = target;
+        this.damage = damage;
+        this.turnNumber = turnNumber;
+    }
+
 
     //getters and setters for parameters to be used in the ability classes
     public Pokemon getUser() {
@@ -338,6 +377,25 @@ public class BattleContext {
     }
     public void setConsecutiveProtect(int consecutiveTurnsProtect) {
         this.consecutiveTurnsProtect = consecutiveTurnsProtect;
+    }
+    public String getWeather() {
+        return weather;
+    }
+    public void setWeather(String weather) {
+        this.weather = weather;
+    }
+    public double getEvasion() {
+        return evasion;
+    }
+    public void setEvasion(double evasion) {
+        this.evasion = evasion;
+    }
+
+    public double getAccuracy() {
+        return accuracy;
+    }
+    public void setAccuracy(double accuracy) {
+        this.accuracy = accuracy;
     }
 
 }

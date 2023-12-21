@@ -51,8 +51,8 @@ public class Pokemon {
 	private boolean canMove = true;
 	private String item = null;
 
-	private int accuracy = 0;
-	private int evasion = 0;
+	private int accuracy = 1;
+	private int evasion = 1;
 	
 	Set<PokemonType> weakness = new HashSet<PokemonType>(); //specific to each Pokemon, taken from the static HashMaps below
 	Set<PokemonType> resistance = new HashSet<PokemonType>();
@@ -550,36 +550,22 @@ public class Pokemon {
 	public String getItem() { //returns the held item of the Pokemon
 		return item;
 	}
-	public void modifyAccuracy(int i){ //modifies the accuracy of the Pokemon
-		//check if adding i will make the accuracy greater than 6 or less than -6; if so, set it to 6 or -6 respectively
-		if (accuracy+i > 6){
-			accuracy = 6;
-		}
-		else if (accuracy+i < -6){
-			accuracy = -6;
-		}
-		else {
-			accuracy+=i; //to lower, pass in a negative number; to raise, pass in a positive number
-		}
-	}
-	public void modifyEvasion(int i){ //modifies the evasion of the Pokemon
-		//check if adding i will make the evasion greater than 6 or less than -6; if so, set it to 6 or -6 respectively
-		if (evasion+i > 6){
-			evasion = 6;
-		}
-		else if (evasion+i < -6){
-			evasion = -6;
-		}
-		else {
-			evasion+=i; //to lower, pass in a negative number; to raise, pass in a positive number
-		}
-	}
-	public int getAccuracyStage(){ //returns the accuracy of the Pokemon
-		return accuracy;
-	}
-	public int getEvasionStage(){ //returns the evasion of the Pokemon
+	public int getEvasion() {
 		return evasion;
 	}
+	
+	public void setEvasion(int newEvasion) {
+		this.evasion = newEvasion;
+	}
+	
+	public int getAccuracy() {
+		return accuracy;
+	}
+	
+	public void setAccuracy(int newAccuracy) {
+		this.accuracy = newAccuracy;
+	}
+	
 	public static double getValue(int value){ 
 		//value is from -6 to 6, with 0 being the default value
 		switch(value){
